@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Docker Properties",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/CoreFunctions",
+                    "/usr/include/c++/7",
+                    "/usr/lib/llvm-8/include"
+                ]
+            },
+            "includePath": [
+                "${workspaceFolder}/CoreFunctions",
+                "${workspaceFolder}/CoreFunctions/Library",
+                "/usr/include/c++/7",
+                "/usr/include",
+                "/usr/lib/llvm-8/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "clang-x64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

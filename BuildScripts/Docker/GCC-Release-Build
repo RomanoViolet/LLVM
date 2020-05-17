@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+export CC=gcc
+export CXX=g++
+
+if [ -d "./build" ]; then
+    rm -rf ./build
+fi
+
+
+mkdir ./build
+cd ./build
+reset && \
+cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_BUILD_TYPE=Release -DCOMPILER=GCC -DSTANDARD=11 ..  && \
+make && \
+cp ./compile_commands.json ../

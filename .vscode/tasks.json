@@ -1,0 +1,84 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "GCC Debug Build",
+            "type": "shell",
+            "linux": {
+                "command": "${workspaceFolder}/BuildScripts/Docker/GCC-Debug-Build"
+            },
+            "windows": {
+                "command": "echo Configuration not complete for a Windows system."
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "GCC Release Build",
+            "type": "shell",
+            "linux": {
+                "command": "${workspaceFolder}/BuildScripts/Docker/GCC-Release-Build"
+            },
+            "windows": {
+                "command": "echo Configuration not complete for a Windows system."
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "LLVM Debug Build",
+            "type": "shell",
+            "linux": {
+                "command": "${workspaceFolder}/BuildScripts/Docker/LLVM-Debug-Build"
+            },
+            "windows": {
+                "command": "echo Configuration not complete for a Windows system."
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "LLVM Release Build",
+            "type": "shell",
+            "linux": {
+                "command": "${workspaceFolder}/BuildScripts/Docker/LLVM-Release-Build"
+            },
+            "windows": {
+                "command": "echo Configuration not complete for a Windows system."
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Generate Coverage Report",
+            "type": "shell",
+            "linux": {
+                "command": "${workspaceFolder}/BuildScripts/Docker/Generate-Coverage-from-UnitTests"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Echo Environment Variables",
+            "type": "shell",
+            "linux": {
+                "command": "echo",
+                "args": [
+                    "${workspaceFolder}"
+                ],
+            },
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

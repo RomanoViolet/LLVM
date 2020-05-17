@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+if [[ $2 =~ ^(LLVM)$ ]]; then
+    export CC=clang
+    export CXX=clang++
+elif [[ $2 =~ ^(GCC)$ ]]; then
+    export CC=gcc
+    export CXX=g++
+fi
+
+if [ -d "./build" ]; then
+    rm -rf ./build
+fi
+
+mkdir ./build
+cd ./build
+#reset && \
+cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_BUILD_TYPE=$1 -DCOMPILER=$2 -DSTANDARD=$3 --graphviz=graph.dot ..  && \
+make && \
+cp ./compile_commands.json ../

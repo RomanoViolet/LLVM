@@ -1,0 +1,120 @@
+{
+    "editor.renderWhitespace": "all",
+    "editor.insertSpaces": true,
+    "editor.parameterHints.enabled": true,
+    "editor.codeLens": true,
+    "C_Cpp.enhancedColorization": "Enabled",
+    "c-cpp-flylint.debug": true,
+    "c-cpp-flylint.clang.pedantic": true,
+    "c-cpp-flylint.flexelint.executable": "/usr/bin/cppcheck",
+    "c-cpp-flylint.clang.executable": "/usr/bin/clang++",
+    "c-cpp-flylint.cppcheck.verbose": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true
+    },
+    "c-cpp-flylint.flexelint.enable": false,
+    "c-cpp-flylint.cppcheck.enable": true,
+    "c-cpp-flylint.clang.extraArgs": [
+        "-Wno-c++98-compat"
+    ],
+    "c-cpp-flylint.clang.includePaths": [
+        "${workspaceFolder}/CoreFunctions"
+    ],
+    "C_Cpp.suggestSnippets": true,
+    "C_Cpp.loggingLevel": "Debug",
+    "C_Cpp.exclusionPolicy": "checkFilesAndFolders",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/CoreFunctions/**"
+    ],
+    "c-cpp-flylint.includePaths": [
+        "${workspaceFolder}/CoreFunctions"
+    ],
+    "c-cpp-flylint.cppcheck.standard": [
+        "c11",
+        "c++11"
+    ],
+    "C_Cpp.default.cppStandard": "c++11",
+    "C_Cpp.inactiveRegionBackgroundColor": "gray",
+    "c-cpp-flylint.clang.enable": true,
+    "c-cpp-flylint.clang.standardLibs": null,
+    "c-cpp-flylint.clang.severityLevels": {
+        "fatal": "Error",
+        "error": "Error",
+        "warning": "Warning",
+        "note": "Information"
+    },
+    "c-cpp-flylint.standard": [
+        "c11",
+        "c++11"
+    ],
+    "c-cpp-flylint.clang.language": "cpp",
+    "c-cpp-flylint.clang.standard": [
+        "c++11"
+    ],
+    "c-cpp-flylint.excludeFromWorkspacePaths": [
+        "${workspaceFolder}/Documentation"
+    ],
+    "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+    "C_Cpp.clang_format_fallbackStyle": "none",
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "algorithm": "cpp",
+        "string": "cpp",
+        "iostream": "cpp",
+        "sstream": "cpp",
+        "iosfwd": "cpp",
+        "limits": "cpp",
+        "cmath": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "*.tcc": "cpp",
+        "cstdint": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "set": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "fstream": "cpp",
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "istream": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp"
+    },
+    "files.eol": "\n",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "clang-format.style": "file",
+    "files.insertFinalNewline": true,
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "terminal.integrated.cwd": "."
+}

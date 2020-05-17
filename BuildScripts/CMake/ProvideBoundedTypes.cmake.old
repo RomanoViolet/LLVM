@@ -1,0 +1,33 @@
+# This function sources the dependency "Bounded Types" used as a library in this
+# project.
+function(ProvideBoundedTypes)
+
+  # Create the folder "BoundedTypes" inside the ${CMAKE_CURRENT_BINARY_DIR}. The
+  # BoundedTypes is a separate project hosted inside the "BoundedTypes" folder
+  # of this repository. For the purpose of this build, it is treated as a
+  # separate project whose sources are available.
+
+  # The custom target is always executed, if "ALL" is specified.
+  add_custom_target(BoundedTypesCopyTarget ALL)
+
+  # The copy commands wrapped in the add_custom_command which is itself attached
+  # to the BoundedTypesCopyTarget.
+  add_custom_command(
+    TARGET BoundedTypesCopyTarget
+    COMMAND file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/BoundedTypes)
+    COMMAND ${CMAKE_COMMAND} -E copy ${BOUNDEDTYPES_SRC_DIR}/*.hpp
+            ${PATH_TO_COPY_BOUNDEDTYPES_SOURCES}
+    COMMAND ${CMAKE_COMMAND} -E copy ${BOUNDEDTYPES_SRC_DIR}/*.cpp
+            ${PATH_TO_COPY_BOUNDEDTYPES_SOURCES}
+    COMMAND ${CMAKE_COMMAND} -E copy ${BOUNDEDTYPES_SRC_DIR}/*.inl
+            ${PATH_TO_COPY_BOUNDEDTYPES_SOURCES}
+    COMMAND
+      file (GLOB_RECURSE SRC ${CMAKE_CURRENT_BINARY_DIR}/BoundedTypes/*.hpp
+            ${CMAKE_CURRENT_BINARY_DIR}/BoundedTypes/*.inl
+            ${CMAKE_CURRENT_BINARY_DIR}/BoundedTypes/*.cpp))
+
+  add_library(BoundedTypes STATIC ${SRC})
+  add_dependencies(BoundedTypes BoundedTypesCopyTarget)
+  set_target_properties(BoundedTypes PROPERTIES LINKER_LANGUAGE CXX)
+
+endfunction(ProvideBoundedTypes)
