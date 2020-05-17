@@ -11,7 +11,6 @@
             },
             "includePath": [
                 "${workspaceFolder}/CoreFunctions",
-                "${workspaceFolder}/CoreFunctions/Library",
                 "/usr/include/c++/7",
                 "/usr/include",
                 "/usr/lib/llvm-8/include"

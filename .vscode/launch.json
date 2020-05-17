@@ -2,30 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Negative Tests",
+            "name": "Debug AstDump",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/GoogleTests/NegativeTests/NegativeTests_GoogleTest",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "Debug Positive Tests",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/GoogleTests/PositiveTests/PositiveTests_GoogleTest",
-            "args": [],
+            "program": "${workspaceFolder}/build/CPPProject",
+            "args": [
+                "${workspaceFolder}/TestVectors/Test.cpp"
+            ],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
