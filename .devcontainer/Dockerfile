@@ -112,10 +112,10 @@ RUN \
   apt-get autoremove -y && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* && \
-  update-alternatives --install /usr/bin/clang clang /usr/bin/clang-8 100 && \
-  update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-8 100 && \
-  update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-8 100 && \
-  update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-8 100 && \
+  #update-alternatives --install /usr/bin/clang clang /usr/bin/clang-8 100 && \
+  #update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-8 100 && \
+  #update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-8 100 && \
+  #update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-8 100 && \
   #
   # Setup locales
   sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -157,9 +157,9 @@ USER dockeruser
 RUN \
   chmod +x /home/dockeruser/.bashrc && \
   chmod +x /home/dockeruser/git-completion.sh && \
-  chmod +x /home/dockeruser/git-prompt.sh && \
-  echo 'export PATH=/clang_8/bin:$PATH' >> ~/.bashrc && \
-  echo 'export LD_LIBRARY_PATH=/clang_8/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+  chmod +x /home/dockeruser/git-prompt.sh
+#echo 'export PATH=/clang_8/bin:$PATH' >> ~/.bashrc && \
+#echo 'export LD_LIBRARY_PATH=/clang_8/lib:/usr/local/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
 
 
 # Define default command.
