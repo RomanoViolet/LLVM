@@ -24,7 +24,7 @@ LineColumn toLineColumn( CXSourceLocation location )
   CXFile file;
   unsigned line, column, offset;
   clang_getSpellingLocation( location, &file, &line, &column, &offset );
-  return {line, column};
+  return { line, column };
 }
 
 void printRelativeLocation( LineColumn previous, LineColumn location )
@@ -45,6 +45,14 @@ CXChildVisitResult countChildren( CXCursor cursor, CXCursor parent, CXClientData
 
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
 {
+  if ( cursor.kind == CXCursorKind ::CXCursor_MacroDefinition ) {
+    std::cout << "Macro" << std::endl;
+  }
+
+  if ( cursor.kind == CXCursorKind ::CXCursor_ClassDecl ) {
+    std::cout << "Class" << std::endl;
+  }
+
   CXSourceLocation location = clang_getCursorLocation( cursor );
   if ( clang_Location_isInSystemHeader( location ) ) {
     return CXChildVisit_Continue;
@@ -97,7 +105,7 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
   unsigned numberOfChildren = 0;
   clang_visitChildren( cursor, countChildren, &numberOfChildren );
 
-  Data nextData{numberOfChildren, prefix};
+  Data nextData{ numberOfChildren, prefix };
   clang_visitChildren( cursor, visit, &nextData );
 
   data->childOffset -= 1;
@@ -114,7 +122,7 @@ void traverse( CXTranslationUnit tu )
   unsigned numberOfChildren = 0;
   clang_visitChildren( root, countChildren, &numberOfChildren );
 
-  Data data{numberOfChildren, ""};
+  Data data{ numberOfChildren, "" };
   clang_visitChildren( root, visit, &data );
 }
 
@@ -125,16 +133,26 @@ auto main( int argc, const char *argv[] ) -> int
 
   // See https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html
   // for the possible options (last argument).
+
+  unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
+                   | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
+                   | CXTranslationUnit_Flags::CXTranslationUnit_SingleFileParse
+                   | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
+                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
+
+  constexpr const char *defaultArguments[]
+      = { "-x", "c++", "-std=c++11", "-Xclang", "-I/workspaces/LLVM/CoreFunctions" };
+
   CXTranslationUnit tu = clang_parseTranslationUnit( index,
                                                      /*source_filename=*/argv[1],
-                                                     /*command_line_args=*/nullptr,
-                                                     /*num_command_line_args=*/0,
+                                                     /*command_line_args=*/defaultArguments,
+                                                     /*num_command_line_args=*/5,
                                                      /*unsaved_files=*/nullptr,
                                                      /*num_unsaved_files=*/0,
-                                                     /*options=*/0 );
+                                                     /*options=*/flags );
 
   if ( tu == nullptr ) {
-    std::cerr << "Error\n";
+    std::cerr << "Unable to parse translation unit. Quitting.\n";
   } else {
     traverse( tu );
     clang_disposeTranslationUnit( tu );
