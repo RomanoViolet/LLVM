@@ -53,6 +53,11 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
     std::cout << "Class" << std::endl;
   }
 
+  if ( cursor.kind == CXCursorKind ::CXCursor_CXXBaseSpecifier ) {
+    std::cout << "Base" << std::endl;
+    std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
+  }
+
   CXSourceLocation location = clang_getCursorLocation( cursor );
   if ( clang_Location_isInSystemHeader( location ) ) {
     return CXChildVisit_Continue;
@@ -136,7 +141,6 @@ auto main( int argc, const char *argv[] ) -> int
 
   unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
                    | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
-                   | CXTranslationUnit_Flags::CXTranslationUnit_SingleFileParse
                    | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
                    | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
 
