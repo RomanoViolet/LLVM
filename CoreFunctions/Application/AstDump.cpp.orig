@@ -58,57 +58,6 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
     std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
   }
 
-  if ( cursor.kind == CXCursorKind::CXCursor_FieldDecl ) {
-    std::cout << "Declaration" << std::endl;
-    std::cout << toString( clang_getTypeSpelling( clang_getCursorType( cursor ) ) ) << std::endl;
-    // std::cout << toString(
-    //     clang_getCursorSpelling( clang_getTypeDeclaration( clang_getCursorType( cursor ) ) ) )
-    //           << std::endl;
-    // std::cout << "Number of template arguments: "
-    //           << ( clang_Cursor_getNumTemplateArguments( cursor ) ) << std::endl;
-  }
-
-  if ( toString(
-           clang_getCursorSpelling( clang_getTypeDeclaration( clang_getCursorType( cursor ) ) ) )
-           .compare( "TypeInputInterface" )
-       == 0 ) {
-    std::cout << toString( clang_getTypeSpelling( clang_getCursorType( cursor ) ) ) << std::endl;
-    std::cout << "Found an input interface" << std::endl;
-  }
-
-  std::cout << "nArgs: " << clang_Type_getNumTemplateArguments( clang_getCursorType( cursor ) )
-            << std::endl;
-
-  if ( clang_Type_getNumTemplateArguments( clang_getCursorType( cursor ) ) == 1 ) {
-    // std::cout << toString( clang_getTypeSpelling(
-    //     clang_Type_getNamedType( clang_Cursor_getTemplateArgumentType( cursor, 0 ) ) ) )
-    //           << std::endl;
-
-    std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
-
-    const CXType type = clang_getCursorType( cursor );
-    std::cout << toString( clang_getTypeSpelling( type ) ) << std::endl;
-    std::cout << toString( clang_getCursorSpelling( clang_getTypeDeclaration( type ) ) )
-              << std::endl;
-  }
-
-  if ( ( cursor.kind == CXCursorKind ::CXCursor_TemplateRef )
-       && ( parent.kind == CXCursorKind::CXCursor_FieldDecl ) ) {
-    std::cout << "Something ..." << std::endl;
-    std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
-    const CXType type = clang_getCursorType( cursor );
-    std::cout << toString( clang_getTypeSpelling( type ) ) << std::endl;
-    std::cout << toString( clang_getCursorSpelling( clang_getTypeDeclaration( type ) ) )
-              << std::endl;
-  }
-
-  if ( toString(
-           clang_getCursorSpelling( clang_getTypeDeclaration( clang_getCursorType( cursor ) ) ) )
-           .compare( "TypeOutputInterface" )
-       == 0 ) {
-    std::cout << "Found an output interface" << std::endl;
-  }
-
   CXSourceLocation location = clang_getCursorLocation( cursor );
   if ( clang_Location_isInSystemHeader( location ) ) {
     return CXChildVisit_Continue;
