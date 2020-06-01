@@ -108,7 +108,9 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "numeric": "cpp",
+        "random": "cpp"
     },
     "files.eol": "\n",
     "editor.formatOnSave": true,
