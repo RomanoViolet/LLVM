@@ -3,8 +3,10 @@ function(buildCPPProject)
 
   # tell CMake where to find all headers required by the sources.
 
+  # file(GLOB_RECURSE CPPProject_SOURCES
+  # ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/*.cpp)
   file(GLOB_RECURSE CPPProject_SOURCES
-       ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/*.cpp)
+       ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/AstDumpOrig.cpp)
   message("CPPProject Sources: " ${CPPProject_SOURCES})
 
   # System Headers

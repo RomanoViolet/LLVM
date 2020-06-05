@@ -45,19 +45,6 @@ CXChildVisitResult countChildren( CXCursor cursor, CXCursor parent, CXClientData
 
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
 {
-  if ( cursor.kind == CXCursorKind ::CXCursor_MacroDefinition ) {
-    std::cout << "Macro" << std::endl;
-  }
-
-  if ( cursor.kind == CXCursorKind ::CXCursor_ClassDecl ) {
-    std::cout << "Class" << std::endl;
-  }
-
-  if ( cursor.kind == CXCursorKind ::CXCursor_CXXBaseSpecifier ) {
-    std::cout << "Base" << std::endl;
-    std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
-  }
-
   CXSourceLocation location = clang_getCursorLocation( cursor );
   if ( clang_Location_isInSystemHeader( location ) ) {
     return CXChildVisit_Continue;
