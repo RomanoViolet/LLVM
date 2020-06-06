@@ -129,7 +129,9 @@ auto main( int argc, const char *argv[] ) -> int
   unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
                    | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
                    | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
-                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
+                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord
+                   | CXTranslationUnit_SingleFileParse;
+  ;
 
   constexpr const char *defaultArguments[]
       = { "-x", "c++", "-std=c++11", "-Xclang", "-I/workspaces/LLVM/CoreFunctions" };
