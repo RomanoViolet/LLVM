@@ -10,7 +10,7 @@ using LineColumn = std::pair< unsigned, unsigned >;
 
 struct ClassDetails {
   std::string _name;
-  std::string _namespace;
+  std::string _namespace = "";
   std::string _baseclass;
 };
 
@@ -18,6 +18,8 @@ struct Data {
   CXCursorKind _cursorKind;
   std::string _tranlationUnitName;
   ClassDetails _classDetails;
+  std::string _temp;
+  bool insideClass = false;
 };
 
 std::string toString( CXString cxString )
@@ -29,6 +31,10 @@ std::string toString( CXString cxString )
 
 CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClientData clientData )
 {
+  // return result -- useful for stopping further exploration of AST
+  // defaults to recursive exploration until explicitly stopped.
+  CXChildVisitResult result = CXChildVisitResult::CXChildVisit_Recurse;
+
   // Parse the header only for items of interest
   const CXCursorKind kind = clang_getCursorKind( cursor );
   // CXString name = clang_getCursorSpelling( cursor );
@@ -36,28 +42,34 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
 
   std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
 
+  // collect all successive namespaces
+  if ( kind == CXCursorKind ::CXCursor_Namespace ) {
+    if ( data->_temp.empty( ) ) {
+      data->_temp = toString( clang_getCursorSpelling( cursor ) );
+    } else {
+      data->_temp.append( "::" + toString( clang_getCursorSpelling( cursor ) ) );
+    }
+  }
+
+  // in order to bot collect all possible non-consecutive namespaces, clear the variable
+  // when the current cursor is not a namespace and neither is the parent.
+  if ( ( kind != CXCursorKind ::CXCursor_Namespace )
+       && ( clang_getCursorKind( parent ) != CXCursorKind ::CXCursor_Namespace ) ) {
+    data->_temp.clear( );
+  }
+
   switch ( kind ) {
     case CXCursorKind ::CXCursor_ClassDecl: {
       // AST hierarchy for top level class: Namespace - Class - Baseclass.
       const CXType type = clang_getCursorType( cursor );
       std::cout << toString( clang_getTypeSpelling( type ) ) << std::endl;
+      data->_classDetails._namespace = data->_temp;
       data->_classDetails._name = toString( clang_getCursorSpelling( cursor ) );
-      data->_classDetails._namespace.append( "::" + toString( clang_getCursorSpelling( parent ) ) );
-      break;
-    }
+      // data->_classDetails._namespace.append( "::" + toString( clang_getCursorSpelling( parent ) )
+      // );
 
-    case CXCursorKind::CXCursor_CXXBaseSpecifier: {
-      // base class. Parent is ClassDecl.
-      assert( clang_getCursorKind( parent ) == CXCursorKind::CXCursor_ClassDecl
-              && "Base Class Without Matching Derived Class." );
-      // do we know the derived class?
-      const CXType type = clang_getCursorType( cursor );
-      std::cout << toString( clang_getTypeSpelling( type ) ) << std::endl;
-      if ( data->_classDetails._name.compare( toString( clang_getCursorSpelling( parent ) ) )
-           == 0 ) {
-        // we know the derived class.
-        data->_classDetails._baseclass = toString( clang_getCursorSpelling( cursor ) );
-      }
+      // stop any further exploration
+      result = CXChildVisitResult::CXChildVisit_Break;
       break;
     }
 
@@ -65,7 +77,7 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
       break;
   }
 
-  return CXChildVisit_Recurse;
+  return result;
 }  // visitForFirstPass
 
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
@@ -75,24 +87,49 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
 
+  std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
+
+  // collect all successive namespaces
+  if ( kind == CXCursorKind ::CXCursor_Namespace ) {
+    if ( data->_temp.empty( ) ) {
+      data->_temp = toString( clang_getCursorSpelling( cursor ) );
+    } else {
+      data->_temp.append( "::" + toString( clang_getCursorSpelling( cursor ) ) );
+    }
+  }
+
+  // in order to bot collect all possible non-consecutive namespaces, clear the variable
+  // when the current cursor is not a namespace and neither is the parent.
+  if ( ( kind != CXCursorKind ::CXCursor_Namespace )
+       && ( clang_getCursorKind( parent ) != CXCursorKind ::CXCursor_Namespace ) ) {
+    data->_temp.clear( );
+  }
+
+  // Look for Base Class
+
   switch ( kind ) {
     case CXCursorKind ::CXCursor_ClassDecl: {
-      // AST hierarchy for top level class: Namespace - Class - Baseclass.
-      data->_classDetails._name = toString( clang_getCursorSpelling( cursor ) );
-      data->_classDetails._namespace.append( "::" + toString( clang_getCursorSpelling( parent ) ) );
+      // Are we examining the correct class?
+      if ( ( data->_temp.compare( data->_classDetails._namespace ) == 0 )
+           && ( data->_classDetails._name.compare( toString( clang_getCursorSpelling( cursor ) ) )
+                == 0 ) ) {
+        // we are at the correct class
+        data->insideClass = true;
+      }
       break;
     }
 
     case CXCursorKind::CXCursor_CXXBaseSpecifier: {
-      // base class. Parent is ClassDecl.
-      assert( clang_getCursorKind( parent ) == CXCursorKind::CXCursor_ClassDecl
-              && "Base Class Without Matching Derived Class." );
-      // do we know the derived class?
-      if ( data->_classDetails._name.compare( toString( clang_getCursorSpelling( parent ) ) )
-           == 0 ) {
-        // we know the derived class.
-        data->_classDetails._baseclass = toString( clang_getCursorSpelling( cursor ) );
+      // only if we are in the class which we want to examine
+      if ( data->insideClass ) {
+        // base class. Parent is ClassDecl.
+        assert( clang_getCursorKind( parent ) == CXCursorKind::CXCursor_ClassDecl
+                && "Base Class Without Matching Derived Class." );
+        // data->_classDetails._baseclass = toString( clang_getCursorSpelling( cursor ) );
+        const CXType type = clang_getCursorType( cursor );
+        data->_classDetails._baseclass = toString( clang_getTypeSpelling( type ) );
       }
+
       break;
     }
 
@@ -139,6 +176,9 @@ auto main( int argc, const char *argv[] ) -> int
   constexpr const char *defaultArguments[] = {
       "-x", "c++", "-std=c++11", "-Xclang", "-fsyntax-only", "-I/workspaces/LLVM/CoreFunctions" };
 
+  // Application-scope data storage
+  Data data;
+
   // First Pass to get class-level information out.
   CXTranslationUnit tu = clang_parseTranslationUnit( index,
                                                      /*source_filename=*/argv[1],
@@ -151,7 +191,6 @@ auto main( int argc, const char *argv[] ) -> int
   if ( tu == nullptr ) {
     std::cerr << "Unable to parse translation unit. Quitting.\n";
   } else {
-    Data data;
     traverseForFirstPass( tu, data );
     clang_disposeTranslationUnit( tu );
   }
@@ -176,7 +215,6 @@ auto main( int argc, const char *argv[] ) -> int
   if ( tu == nullptr ) {
     std::cerr << "Unable to parse translation unit. Quitting.\n";
   } else {
-    Data data;
     traverse( tu, data );
     clang_disposeTranslationUnit( tu );
   }

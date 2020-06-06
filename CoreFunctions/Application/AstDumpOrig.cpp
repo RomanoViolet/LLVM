@@ -129,8 +129,8 @@ auto main( int argc, const char *argv[] ) -> int
   unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
                    | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
                    | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
-                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord
-                   | CXTranslationUnit_SingleFileParse;
+                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
+  //| CXTranslationUnit_SingleFileParse;
   ;
 
   constexpr const char *defaultArguments[]

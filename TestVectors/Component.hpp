@@ -6,28 +6,32 @@
 #include <Library/InterfaceTypes/InterfaceB.hpp>
 #include <Library/InterfaceTypes/Type_InputInterface.hpp>
 #include <Library/InterfaceTypes/Type_OutputInterface.hpp>
-namespace RomanoViolet
+namespace NN
 {
-  class Component : public TypeHighAssuranceComponent
+  namespace RomanoViolet
   {
-  public:
-    enum class ErrorCode : short { NO_ERROR = 0U, BAD_INPUT_DATA = 1U };
-
-    Component( )
-        : a_in( TypeInputInterface< InterfaceA >( ) ), b_out( TypeOutputInterface< InterfaceB >( ) )
+    class Component : public TypeHighAssuranceComponent
     {
-    }
-    TypeInputInterface< InterfaceA > a_in;
-    TypeOutputInterface< InterfaceB > b_out;
+    public:
+      enum class ErrorCode : short { NO_ERROR = 0U, BAD_INPUT_DATA = 1U };
 
-    void initialize( );
-    void doPreconditionCheck( );
-    void compute( );
-    void doPostConditionCheck( );
+      Component( )
+          : a_in( ::RomanoViolet::TypeInputInterface< ::RomanoViolet::InterfaceA >( ) )
+          , b_out( ::RomanoViolet::TypeOutputInterface< ::RomanoViolet::InterfaceB >( ) )
+      {
+      }
+      ::RomanoViolet::TypeInputInterface< ::RomanoViolet::InterfaceA > a_in;
+      ::RomanoViolet::TypeOutputInterface< ::RomanoViolet::InterfaceB > b_out;
 
-  private:
-    ErrorCode _error;
-  };
-}  // namespace RomanoViolet
+      void initialize( );
+      void doPreconditionCheck( );
+      void compute( );
+      void doPostConditionCheck( );
+
+    private:
+      ErrorCode _error;
+    };
+  }  // namespace RomanoViolet
+}  // namespace NN
 
 #endif  // COMPONENT_HPP_
