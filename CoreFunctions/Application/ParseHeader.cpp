@@ -5,8 +5,14 @@
 #include <iostream>
 #include <string>
 #include <utility>
-
+#include <vector>
 using LineColumn = std::pair< unsigned, unsigned >;
+
+struct IODetails {
+  std::string _ioName;
+  std::string _type;
+  std::string _direction;
+};
 
 struct ClassDetails {
   std::string _name;
@@ -18,8 +24,11 @@ struct Data {
   CXCursorKind _cursorKind;
   std::string _tranlationUnitName;
   ClassDetails _classDetails;
+  std::vector< IODetails > io;
   std::string _temp;
+  IODetails _tempIODetails;
   bool insideClass = false;
+  bool insideIODeclaration = false;
 };
 
 std::string toString( CXString cxString )
@@ -105,6 +114,22 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
     data->_temp.clear( );
   }
 
+  // // collect all successive namespace references
+  // if ( kind == CXCursorKind ::CXCursor_NamespaceRef ) {
+  //   if ( data->_temp.empty( ) ) {
+  //     data->_temp = toString( clang_getCursorSpelling( cursor ) );
+  //   } else {
+  //     data->_temp.append( "::" + toString( clang_getCursorSpelling( cursor ) ) );
+  //   }
+  // }
+
+  // // in order to bot collect all possible non-consecutive namespaces references, clear the
+  // variable
+  // // when the current cursor is not a namespace and neither is the parent.
+  // if ( ( kind != CXCursorKind ::CXCursor_NamespaceRef )
+  //      && ( clang_getCursorKind( parent ) != CXCursorKind ::CXCursor_NamespaceRef ) ) {
+  //   data->_temp.clear( );
+  // }
   // Look for Base Class
 
   switch ( kind ) {
@@ -128,6 +153,26 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
         // data->_classDetails._baseclass = toString( clang_getCursorSpelling( cursor ) );
         const CXType type = clang_getCursorType( cursor );
         data->_classDetails._baseclass = toString( clang_getTypeSpelling( type ) );
+        break;
+      }
+    }
+
+    case CXCursorKind::CXCursor_FieldDecl: {
+      if ( data->insideClass ) {
+        std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
+        data->_tempIODetails._ioName = toString( clang_getCursorSpelling( cursor ) );
+        data->insideIODeclaration = true;
+      }
+      // data->io.emplace_back(
+      //     IODetails{ _ioName : toString( clang_getCursorSpelling( cursor ) ) } );
+      break;
+    }
+
+    case CXCursorKind::CXCursor_TemplateRef: {
+      if ( data->insideIODeclaration ) {
+        const CXType type = clang_getCursorType( cursor );
+        std::cout << toString( clang_getTypeSpelling( type ) ) << " ";
+        data->_tempIODetails._type = toString( clang_getTypeSpelling( type ) );
       }
 
       break;
@@ -136,6 +181,7 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
     default:
       break;
   }
+
   // clang visitor should visit the next sibling of this cursor without visiting the children.
   return CXChildVisit_Recurse;
 }  // visit
