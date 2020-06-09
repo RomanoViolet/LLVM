@@ -170,9 +170,27 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
 
     case CXCursorKind::CXCursor_TemplateRef: {
       if ( data->insideIODeclaration ) {
-        const CXType type = clang_getCursorType( cursor );
-        std::cout << toString( clang_getTypeSpelling( type ) ) << " ";
-        data->_tempIODetails._type = toString( clang_getTypeSpelling( type ) );
+        std::string direction = toString( clang_getCursorSpelling( cursor ) );
+        if ( ( direction.compare( "TypeInputInterface" ) == 0 )
+             || ( direction.compare( "TypeOutputInterface" ) == 0 ) ) {
+          data->_tempIODetails._direction = direction;
+        } else {
+          // this is not the field declaration we are interested in.
+          data->_tempIODetails = IODetails{ };
+          data->insideIODeclaration = false;
+        }
+
+        break;
+      }
+
+      case CXCursorKind::CXCursor_TypeRef: {
+        if ( data->insideIODeclaration ) {
+          data->_tempIODetails._type = toString( clang_getCursorSpelling( cursor ) );
+          data->io.emplace_back( data->_tempIODetails );
+          data->_tempIODetails = IODetails{ };
+          data->insideIODeclaration = false;
+          break;
+        }
       }
 
       break;
