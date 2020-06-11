@@ -5,12 +5,12 @@
 # https://blobfolio.com/2018/12/using-docker-as-a-build-environment/
 
 # Pull base image.
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # On single RUN command: https://coderwall.com/p/4g8znw/things-i-learned-while-writing-a-dockerfile
 LABEL CPPDocker.version="0.1-beta"
 LABEL vendor="Devendra Rai, rai.devendra@yahoo.co.uk"
-LABEL CPPDocker.release-date="2019-10-03"
+LABEL CPPDocker.release-date="2020-06-11"
 LABEL CPPDocker.version.is-production="No"
 
 ARG GTESTCOMMITID=cad3bc46c2ba8ec0bd7bb252d7279fe791140fbf
@@ -65,9 +65,9 @@ RUN \
   #
   # LLVM Repository
   wget -O - 'http://apt.llvm.org/llvm-snapshot.gpg.key' | apt-key add - \
-  && echo 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main' \
+  && echo 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal main' \
   >> /etc/apt/sources.list \
-  && echo 'deb-src http://apt.llvm.org/bionic/ llvm-toolchain-bionic main' \
+  && echo 'deb-src http://apt.llvm.org/focal/ llvm-toolchain-focal main' \
   >> /etc/apt/sources.list && \
   apt-get update && \
   #
