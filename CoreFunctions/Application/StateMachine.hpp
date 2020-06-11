@@ -70,6 +70,7 @@ namespace RomanoViolet
     using _newState_t = State;
 
     // ruleset: _currentState >--- Event ----> _newState
+    // Multiple _newStates may be reachable from _currentState based on Events (thus, vector<...>)
     std::map< _currentState_t, std::vector< Event, _newState_t > > rules;
 
   };  // class StateMachine;
