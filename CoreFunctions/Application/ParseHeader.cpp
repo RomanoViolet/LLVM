@@ -226,6 +226,7 @@ void traverseForFirstPass( CXTranslationUnit tu, Data &data )
 
 auto main( int argc, const char *argv[] ) -> int
 {
+  ( void )argc;
   CXIndex index = clang_createIndex( /*excludeDeclarationsFromPCH=*/true,
                                      /*displayDiagnostics=*/true );
 

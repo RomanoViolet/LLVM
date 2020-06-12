@@ -32,7 +32,7 @@ namespace RomanoViolet
     enum class Event : short {
       NAMESPACE,
       CLASS_DECLARATION,
-      BASECLASS_SPECIFIER,
+      CLASSNAME_MATCH_AND_BASECLASS_SPECIFIER,
       TYPEREF,
       CXX_ACCESS_SPECIFIER,
       FIELD_DECLARATION,
@@ -69,7 +69,7 @@ namespace RomanoViolet
 
     // ruleset: _currentState >--- Event ----> _newState
     // Multiple _newStates may be reachable from _currentState based on Events (thus, vector<...>)
-    std::map< _currentState_t, std::vector< Event, _newState_t > > rules;
+    std::map< _currentState_t, std::vector< std::pair< Event, _newState_t > > > rules;
 
   };  // class StateMachine;
 }  // namespace RomanoViolet

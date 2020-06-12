@@ -6,7 +6,8 @@ function(buildCPPProject)
   # file(GLOB_RECURSE CPPProject_SOURCES
   # ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/*.cpp)
   file(GLOB_RECURSE CPPProject_SOURCES
-       ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/ParseHeader.cpp)
+       ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/ParseHeader.cpp
+       ${PROJECT_SOURCE_DIR}/CoreFunctions/Application/StateMachine.cpp)
   message("CPPProject Sources: " ${CPPProject_SOURCES})
 
   # System Headers
