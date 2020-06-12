@@ -14,9 +14,7 @@ namespace RomanoViolet
      *
      * @param initialClass: The class from AST which is to be examined.
      */
-    StateMachine( const std::string initialClass ) : _classToInspect( initialClass )
-    {
-    }
+    StateMachine( const std::string initialClass );
 
     // All possible states of the state machine.
     enum class State : short {
