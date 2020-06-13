@@ -24,6 +24,7 @@ namespace RomanoViolet
       WAITING_FOR_TYPEREF,
       BASENAME_COLLECTION,
       IONAME_COLLECTION,
+      IONAMESPACE_COLLECTION,
       IODIRECTION_COLLECTION,
       IOTYPE_COLLECTION
     };
@@ -40,13 +41,13 @@ namespace RomanoViolet
       TEMPLATE_REFERENCE
     };
 
-    void advanceStateMachine( const Event event );
-    void doInStateAction( );
+    void AdvanceStateMachine( const Event event );
+    void DoInStateAction( );
 
   private:
     State _currentState;
     const std::string _classToInspect;
-    void computeTransition( std::string astLabel );
+    void ComputeTransition( std::string astLabel );
 
     struct IODetails {
       std::string _ioName;
