@@ -11,6 +11,10 @@ namespace RomanoViolet
     this->rules[State::INIT] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
                                  { Event::CLASS_DECLARATION, State::CLASSNAME_COLLECTION } };
 
+    this->rules[State::NAMESPACE_COLLECTION]
+        = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
+            { Event::CLASS_DECLARATION, State::CLASSNAME_COLLECTION } };
+
     this->rules[State::CLASSNAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::CLASSNAME_MATCH_AND_BASECLASS_SPECIFIER, State::WAITING_FOR_TYPEREF } };
@@ -36,6 +40,8 @@ namespace RomanoViolet
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::TYPEREF, State::IOTYPE_COLLECTION },
             { Event::FIELD_DECLARATION, State::IONAME_COLLECTION } };
+
+    this->_currentState = State::INIT;
   }
 
   StateMachine::State StateMachine::GetNewState( const State currentState, const Event event )
@@ -54,6 +60,13 @@ namespace RomanoViolet
       }
     }
 
+    // process events, such as (_currentState == NAMESPACE && !((event == CLASS_DECLARATION) ||
+    // (event == NAMESPACE))
+    if ( ( this->_currentState == State::NAMESPACE_COLLECTION )
+         && ( !( ( event == Event::NAMESPACE ) || ( event == Event::CLASS_DECLARATION ) ) ) ) {
+      targetState = State::INIT;
+    }
+
     return ( targetState );
   }
 
@@ -68,6 +81,10 @@ namespace RomanoViolet
                                       const CXCursor cursor )
   {
     switch ( currentState ) {
+      case StateMachine::State::INIT: {
+        this->ResetAllData( );
+        break;
+      }
       case StateMachine::State::NAMESPACE_COLLECTION: {
         this->CollectNamespace( cursor );
         break;
@@ -95,12 +112,32 @@ namespace RomanoViolet
         break;
       }
 
+      case CXCursorKind::CXCursor_ClassDecl: {
+        newState = this->GetNewState( this->_currentState, Event::NAMESPACE );
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        break;
+      }
+
       default:
+        newState = State::INIT;
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
         break;
     }
+  }
 
-    if ( kind == CXCursorKind ::CXCursor_Namespace ) {
-    }
+  void StateMachine::ResetAllData( )
+  {
+    this->_classDetails.clear( );
+  }
+
+  void StateMachine::ClassDetails::clear( )
+  {
+    this->_baseclass.clear( );
+    this->_name.clear( );
+    this->_namespace.clear( );
+    this->_io.clear( );
   }
 
   void StateMachine::CollectNamespace( const CXCursor cursor )

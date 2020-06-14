@@ -51,8 +51,6 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
 
-  data->sm->AdvanceStateMachine( cursor );
-
   std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
 
   // collect all successive namespaces
@@ -99,6 +97,12 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
   CXCursorKind kind = clang_getCursorKind( cursor );
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
+
+  if ( toString( clang_getCursorSpelling( cursor ) ).compare( "NN" ) == 0 ) {
+    std::cout << "Here it starts" << std::endl;
+  }
+
+  data->sm->AdvanceStateMachine( cursor );
 
   std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
 
