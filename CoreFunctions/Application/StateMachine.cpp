@@ -7,6 +7,7 @@ namespace RomanoViolet
       : _currentState( State::INIT ), _classToInspect( initialClass )
   {
     // the rules
+    // Priority in case of conflicts: The event which comes first in the listing.
     this->rules[State::INIT] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
                                  { Event::CLASS_DECLARATION, State::CLASSNAME_COLLECTION } };
 
@@ -37,12 +38,64 @@ namespace RomanoViolet
             { Event::FIELD_DECLARATION, State::IONAME_COLLECTION } };
   }
 
-  void StateMachine::ComputeTransition( std::string astLabel )
+  StateMachine::State StateMachine::GetNewState( const State currentState, const Event event )
+  {
+    // get the vector containing all events, newState pairs
+    std::vector< std::pair< Event, _newState_t > > possibilities = this->rules[currentState];
+
+    // The new target state
+    StateMachine::State targetState;
+
+    // Index into the vector based on the event
+    for ( const std::pair< Event, _newState_t > thisPossibility : possibilities ) {
+      if ( thisPossibility.first == event ) {
+        targetState = thisPossibility.second;
+        break;
+      }
+    }
+
+    return ( targetState );
+  }
+
+  std::string toString( CXString cxString )
+  {
+    std::string string = clang_getCString( cxString );
+    clang_disposeString( cxString );
+    return string;
+  }
+
+  void StateMachine::DoInStateAction( const StateMachine::State currentState,
+                                      const CXCursor cursor )
+  {
+    switch ( currentState ) {
+      case StateMachine::State::NAMESPACE_COLLECTION: {
+        this->toString( clang_getCursorSpelling( cursor ) );
+        break;
+      }
+    }
+  }
+
+  void StateMachine::ComputeTransition( const Event event )
   {
   }
 
   // reads the AST line by line in order to advance the state machine
-  void StateMachine::AdvanceStateMachine( const std::string astLine )
+  void StateMachine::AdvanceStateMachine( const CXCursor cursor )
   {
+    const CXCursorKind kind = clang_getCursorKind( cursor );
+    State newState;
+    switch ( kind ) {
+      case CXCursorKind ::CXCursor_Namespace: {
+        newState = this->GetNewState( this->_currentState, Event::NAMESPACE );
+        this->DoInStateAction( newState );
+        break;
+      }
+
+      default:
+        break;
+    }
+
+    if ( kind == CXCursorKind ::CXCursor_Namespace ) {
+    }
   }
 }  // namespace RomanoViolet

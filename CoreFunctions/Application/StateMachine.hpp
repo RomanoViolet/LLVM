@@ -1,6 +1,7 @@
 #ifndef _STATEMACHINE_HPP_
 #define _STATEMACHINE_HPP_
 
+#include <clang-c/Index.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -41,13 +42,15 @@ namespace RomanoViolet
       TEMPLATE_REFERENCE
     };
 
-    void AdvanceStateMachine( const Event event );
-    void DoInStateAction( );
+    void AdvanceStateMachine( const CXCursor cursor );
+    void DoInStateAction( const State currentState, const CXCursor cursor );
 
   private:
     State _currentState;
     const std::string _classToInspect;
-    void ComputeTransition( std::string astLabel );
+    void ComputeTransition( const Event event );
+    State GetNewState( const State currentState, const Event event );
+    std::string toString( CXString cxString );
 
     struct IODetails {
       std::string _ioName;

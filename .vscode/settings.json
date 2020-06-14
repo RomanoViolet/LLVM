@@ -110,7 +110,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "numeric": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "bit": "cpp"
     },
     "files.eol": "\n",
     "editor.formatOnSave": true,

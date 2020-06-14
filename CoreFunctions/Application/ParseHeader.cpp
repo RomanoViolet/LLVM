@@ -1,6 +1,7 @@
 #include <cassert>
 #include <clang-c/Index.h>
 
+#include "StateMachine.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -29,6 +30,7 @@ struct Data {
   IODetails _tempIODetails;
   bool insideClass = false;
   bool insideIODeclaration = false;
+  RomanoViolet::StateMachine *sm;
 };
 
 std::string toString( CXString cxString )
@@ -48,6 +50,8 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
   const CXCursorKind kind = clang_getCursorKind( cursor );
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
+
+  data->sm->AdvanceStateMachine( cursor );
 
   std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
 
@@ -262,6 +266,7 @@ auto main( int argc, const char *argv[] ) -> int
   clang_disposeIndex( index );
 
   // Second Pass
+  RomanoViolet::StateMachine sm{ data._classDetails._name };
   index = clang_createIndex( /*excludeDeclarationsFromPCH=*/true,
                              /*displayDiagnostics=*/true );
   flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
@@ -280,6 +285,7 @@ auto main( int argc, const char *argv[] ) -> int
   if ( tu == nullptr ) {
     std::cerr << "Unable to parse translation unit. Quitting.\n";
   } else {
+    data.sm = &sm;
     traverse( tu, data );
     clang_disposeTranslationUnit( tu );
   }
