@@ -57,7 +57,7 @@ namespace RomanoViolet
     return ( targetState );
   }
 
-  std::string toString( CXString cxString )
+  std::string StateMachine::toString( CXString cxString )
   {
     std::string string = clang_getCString( cxString );
     clang_disposeString( cxString );
@@ -69,9 +69,12 @@ namespace RomanoViolet
   {
     switch ( currentState ) {
       case StateMachine::State::NAMESPACE_COLLECTION: {
-        this->toString( clang_getCursorSpelling( cursor ) );
+        this->CollectNamespace( cursor );
         break;
       }
+
+      default:
+        break;
     }
   }
 
@@ -87,7 +90,8 @@ namespace RomanoViolet
     switch ( kind ) {
       case CXCursorKind ::CXCursor_Namespace: {
         newState = this->GetNewState( this->_currentState, Event::NAMESPACE );
-        this->DoInStateAction( newState );
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
         break;
       }
 
@@ -98,4 +102,15 @@ namespace RomanoViolet
     if ( kind == CXCursorKind ::CXCursor_Namespace ) {
     }
   }
+
+  void StateMachine::CollectNamespace( const CXCursor cursor )
+  {
+    // TODO: Clear namespace on entering the namespace the first time.
+    if ( this->_classDetails._namespace.empty( ) ) {
+      this->_classDetails._namespace.append( this->toString( clang_getCursorSpelling( cursor ) ) );
+    } else {
+      this->_classDetails._namespace.append(
+          "::" + this->toString( clang_getCursorSpelling( cursor ) ) );
+    }
+  }  // StateMachine::CollectNamespace
 }  // namespace RomanoViolet

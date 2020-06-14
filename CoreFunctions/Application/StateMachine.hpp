@@ -51,6 +51,7 @@ namespace RomanoViolet
     void ComputeTransition( const Event event );
     State GetNewState( const State currentState, const Event event );
     std::string toString( CXString cxString );
+    void CollectNamespace( const CXCursor cursor );
 
     struct IODetails {
       std::string _ioName;
