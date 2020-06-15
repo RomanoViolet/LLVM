@@ -34,7 +34,7 @@ namespace RomanoViolet
     enum class Event : short {
       NAMESPACE,
       CLASS_DECLARATION,
-      CLASSNAME_MATCH_AND_BASECLASS_SPECIFIER,
+      BASECLASS_SPECIFIER,
       TYPEREF,
       CXX_ACCESS_SPECIFIER,
       FIELD_DECLARATION,
@@ -53,6 +53,8 @@ namespace RomanoViolet
     std::string toString( CXString cxString );
     void ResetAllData( );
     void CollectNamespace( const CXCursor cursor );
+    void CollectClassName( const CXCursor cursor );
+    void CollectBaseClassName( const CXCursor cursor );
 
     struct IODetails {
       std::string _ioName;

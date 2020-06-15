@@ -1,5 +1,5 @@
 #include "StateMachine.hpp"
-
+#include <iostream>
 namespace RomanoViolet
 {
   // constructor
@@ -17,8 +17,9 @@ namespace RomanoViolet
 
     this->rules[State::CLASSNAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
-            { Event::CLASSNAME_MATCH_AND_BASECLASS_SPECIFIER, State::WAITING_FOR_TYPEREF } };
+            { Event::BASECLASS_SPECIFIER, State::WAITING_FOR_TYPEREF } };
 
+    // TODO: Waiting for Typeref and BaseName Collection states are equivalent.
     this->rules[State::WAITING_FOR_TYPEREF] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
                                                 { Event::TYPEREF, State::BASENAME_COLLECTION } };
 
@@ -90,6 +91,21 @@ namespace RomanoViolet
         break;
       }
 
+      case StateMachine::State::CLASSNAME_COLLECTION: {
+        this->CollectClassName( cursor );
+        break;
+      }
+
+      case StateMachine::State::WAITING_FOR_TYPEREF: {
+        this->CollectBaseClassName( cursor );
+        break;
+      }
+
+      case StateMachine::State::BASENAME_COLLECTION: {
+        this->CollectBaseClassName( cursor );
+        break;
+      }
+
       default:
         break;
     }
@@ -113,7 +129,35 @@ namespace RomanoViolet
       }
 
       case CXCursorKind::CXCursor_ClassDecl: {
-        newState = this->GetNewState( this->_currentState, Event::NAMESPACE );
+        newState = this->GetNewState( this->_currentState, Event::CLASS_DECLARATION );
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        break;
+      }
+
+      case CXCursorKind::CXCursor_CXXBaseSpecifier: {
+        // if class name matches the one that we should find
+        if ( this->_classDetails._name.compare( this->_classToInspect ) == 0 ) {
+          newState = this->GetNewState( this->_currentState, Event::BASECLASS_SPECIFIER );
+        } else {
+          // if it is not the class that is being sought, go back to initial state.
+          newState = StateMachine::State::INIT;
+        }
+
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        break;
+      }
+
+      case CXCursorKind::CXCursor_TypeRef: {
+        // if class name matches the one that we should find
+        if ( this->_classDetails._name.compare( this->_classToInspect ) == 0 ) {
+          newState = this->GetNewState( this->_currentState, Event::TYPEREF );
+        } else {
+          // if it is not the class that is being sought, go back to initial state.
+          newState = StateMachine::State::INIT;
+        }
+
         this->DoInStateAction( newState, cursor );
         this->_currentState = newState;
         break;
@@ -142,7 +186,6 @@ namespace RomanoViolet
 
   void StateMachine::CollectNamespace( const CXCursor cursor )
   {
-    // TODO: Clear namespace on entering the namespace the first time.
     if ( this->_classDetails._namespace.empty( ) ) {
       this->_classDetails._namespace.append( this->toString( clang_getCursorSpelling( cursor ) ) );
     } else {
@@ -150,4 +193,16 @@ namespace RomanoViolet
           "::" + this->toString( clang_getCursorSpelling( cursor ) ) );
     }
   }  // StateMachine::CollectNamespace
+
+  void StateMachine::CollectClassName( const CXCursor cursor )
+  {
+    this->_classDetails._name = this->toString( clang_getCursorSpelling( cursor ) );
+  }  // StateMachine::CollectClassName
+
+  void StateMachine::CollectBaseClassName( const CXCursor cursor )
+  {
+    const CXType type = clang_getCursorType( cursor );
+    this->_classDetails._baseclass = this->toString( clang_getTypeSpelling( type ) );
+  }  // StateMachine::CollectBaseClassName
+
 }  // namespace RomanoViolet
