@@ -1,4 +1,5 @@
 #include "StateMachine.hpp"
+#include <cassert>
 #include <iostream>
 namespace RomanoViolet
 {
@@ -17,15 +18,14 @@ namespace RomanoViolet
 
     this->rules[State::CLASSNAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
-            { Event::BASECLASS_SPECIFIER, State::WAITING_FOR_TYPEREF } };
-
-    // TODO: Waiting for Typeref and BaseName Collection states are equivalent.
-    this->rules[State::WAITING_FOR_TYPEREF] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
-                                                { Event::TYPEREF, State::BASENAME_COLLECTION } };
+            { Event::BASECLASS_SPECIFIER, State::BASENAME_COLLECTION } };
 
     this->rules[State::BASENAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
-            { Event::FIELD_DECLARATION, State::IONAME_COLLECTION } };
+            { Event::FIELD_DECLARATION, State::IONAME_COLLECTION },
+            { Event::TYPEREF, State::IDLE } };
+
+    // TODO Update the rules to account for an IDLE state
 
     this->rules[State::IONAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
@@ -50,6 +50,9 @@ namespace RomanoViolet
     // get the vector containing all events, newState pairs
     std::vector< std::pair< Event, _newState_t > > possibilities = this->rules[currentState];
 
+    // was a new target state successfully computed?
+    bool isNewTargetStateComputed = false;
+
     // The new target state
     StateMachine::State targetState;
 
@@ -57,6 +60,7 @@ namespace RomanoViolet
     for ( const std::pair< Event, _newState_t > thisPossibility : possibilities ) {
       if ( thisPossibility.first == event ) {
         targetState = thisPossibility.second;
+        isNewTargetStateComputed = true;
         break;
       }
     }
@@ -66,8 +70,13 @@ namespace RomanoViolet
     if ( ( this->_currentState == State::NAMESPACE_COLLECTION )
          && ( !( ( event == Event::NAMESPACE ) || ( event == Event::CLASS_DECLARATION ) ) ) ) {
       targetState = State::INIT;
+      isNewTargetStateComputed = true;
     }
 
+    if ( !isNewTargetStateComputed ) {
+      // if no new target state is computed, then state in the current state
+      targetState = currentState;
+    }
     return ( targetState );
   }
 
@@ -96,13 +105,17 @@ namespace RomanoViolet
         break;
       }
 
-      case StateMachine::State::WAITING_FOR_TYPEREF: {
+      case StateMachine::State::BASENAME_COLLECTION: {
         this->CollectBaseClassName( cursor );
         break;
       }
 
-      case StateMachine::State::BASENAME_COLLECTION: {
-        this->CollectBaseClassName( cursor );
+      case StateMachine::State::IONAME_COLLECTION: {
+        this->CollectIOName( cursor );
+        break;
+      }
+
+      case StateMachine::State::IDLE: {
         break;
       }
 
@@ -131,11 +144,19 @@ namespace RomanoViolet
       case CXCursorKind::CXCursor_ClassDecl: {
         newState = this->GetNewState( this->_currentState, Event::CLASS_DECLARATION );
         this->DoInStateAction( newState, cursor );
-        this->_currentState = newState;
+
+        // fi the class name does not match the one that we are after
+        if ( this->_classDetails._name.compare( this->_classToInspect ) != 0 ) {
+          newState = StateMachine::State::INIT;
+          this->DoInStateAction( newState, cursor );
+        } else {
+          this->_currentState = newState;
+        }
         break;
       }
 
       case CXCursorKind::CXCursor_CXXBaseSpecifier: {
+        assert( true && "This case should never have happened" );
         // if class name matches the one that we should find
         if ( this->_classDetails._name.compare( this->_classToInspect ) == 0 ) {
           newState = this->GetNewState( this->_currentState, Event::BASECLASS_SPECIFIER );
@@ -163,10 +184,17 @@ namespace RomanoViolet
         break;
       }
 
-      default:
-        newState = State::INIT;
+      case CXCursorKind::CXCursor_FieldDecl: {
+        newState = this->GetNewState( this->_currentState, Event::FIELD_DECLARATION );
         this->DoInStateAction( newState, cursor );
         this->_currentState = newState;
+        break;
+      }
+
+      default:
+        // newState = State::INIT;
+        // this->DoInStateAction( newState, cursor );
+        // this->_currentState = newState;
         break;
     }
   }
@@ -203,6 +231,15 @@ namespace RomanoViolet
   {
     const CXType type = clang_getCursorType( cursor );
     this->_classDetails._baseclass = this->toString( clang_getTypeSpelling( type ) );
+  }  // StateMachine::CollectBaseClassName
+
+  void StateMachine::CollectIOName( const CXCursor cursor )
+  {
+    const CXType type = clang_getCursorType( cursor );
+    IODetails _io;
+    _io._ioName = this->toString( clang_getTypeSpelling( type ) );
+    this->_classDetails._io.emplace_back( _io );
+
   }  // StateMachine::CollectBaseClassName
 
 }  // namespace RomanoViolet
