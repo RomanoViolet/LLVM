@@ -23,9 +23,10 @@ namespace RomanoViolet
     this->rules[State::BASENAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::FIELD_DECLARATION, State::IONAME_COLLECTION },
-            { Event::TYPEREF, State::IDLE } };
+            { Event::TYPEREF, State::IDLE_AFTER_BASENAMECOLLECTION } };
 
-    // TODO Update the rules to account for an IDLE state
+    this->rules[State::IDLE_AFTER_BASENAMECOLLECTION]
+        = { { Event::FIELD_DECLARATION, State::IONAME_COLLECTION } };
 
     this->rules[State::IONAME_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
@@ -40,7 +41,12 @@ namespace RomanoViolet
     this->rules[State::IODIRECTION_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::TYPEREF, State::IOTYPE_COLLECTION },
-            { Event::FIELD_DECLARATION, State::IONAME_COLLECTION } };
+            { Event::FIELD_DECLARATION, State::IONAME_COLLECTION },
+            { Event::NAME_SPACE_REFERENCE, State::IDLE_AFTER_IODIRECTIONCOLLECTION } };
+
+    this->rules[State::IDLE_AFTER_IODIRECTIONCOLLECTION]
+        = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
+            { Event::TYPEREF, State::IOTYPE_COLLECTION } };
 
     this->_currentState = State::INIT;
   }
@@ -115,7 +121,26 @@ namespace RomanoViolet
         break;
       }
 
-      case StateMachine::State::IDLE: {
+      case StateMachine::State::IDLE_AFTER_BASENAMECOLLECTION: {
+        break;
+      }
+
+      case StateMachine::State::IONAMESPACE_COLLECTION: {
+        this->CollectIONameSpace( cursor );
+        break;
+      }
+
+      case StateMachine::State::IODIRECTION_COLLECTION: {
+        this->CollectIODirection( cursor );
+        break;
+      }
+
+      case StateMachine::State::IOTYPE_COLLECTION: {
+        this->CollectIOType( cursor );
+        break;
+      }
+
+      case StateMachine::State::IDLE_AFTER_IODIRECTIONCOLLECTION: {
         break;
       }
 
@@ -191,6 +216,20 @@ namespace RomanoViolet
         break;
       }
 
+      case CXCursorKind::CXCursor_NamespaceRef: {
+        newState = this->GetNewState( this->_currentState, Event::NAME_SPACE_REFERENCE );
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        break;
+      }
+
+      case CXCursorKind::CXCursor_TemplateRef: {
+        newState = this->GetNewState( this->_currentState, Event::TEMPLATE_REFERENCE );
+        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        break;
+      }
+
       default:
         // newState = State::INIT;
         // this->DoInStateAction( newState, cursor );
@@ -235,11 +274,61 @@ namespace RomanoViolet
 
   void StateMachine::CollectIOName( const CXCursor cursor )
   {
-    const CXType type = clang_getCursorType( cursor );
     IODetails _io;
-    _io._ioName = this->toString( clang_getTypeSpelling( type ) );
+    _io._ioName = this->toString( clang_getCursorSpelling( cursor ) );
     this->_classDetails._io.emplace_back( _io );
 
   }  // StateMachine::CollectBaseClassName
+
+  void StateMachine::CollectIONameSpace( const CXCursor cursor )
+  {
+    // Entry to this state is only via IONAME_COLLECTION state wherein an IODetails instance is
+    // already created.
+    // number of io instances already recorded
+    size_t nInstances = this->_classDetails._io.size( );
+
+    // extract the latest instance.
+    IODetails &_io = this->_classDetails._io.at( nInstances - 1 );
+    if ( _io._namespace.empty( ) ) {
+      _io._namespace = this->toString( clang_getCursorSpelling( cursor ) );
+    } else {
+      _io._namespace.append( "::" + this->toString( clang_getCursorSpelling( cursor ) ) );
+    }
+  }  // StateMachine::CollectIONameSpace
+
+  void StateMachine::CollectIODirection( const CXCursor cursor )
+  {
+    // Entry to this state is is only possible by passing through the state IONAME_COLLECTION
+    // wherein an IODetails instance is created. already created. number of io instances already
+    // recorded
+    size_t nInstances = this->_classDetails._io.size( );
+
+    // extract the latest instance.
+    IODetails &_io = this->_classDetails._io.at( nInstances - 1 );
+
+    std::string _ioTemplate = this->toString( clang_getCursorSpelling( cursor ) );
+    if ( _ioTemplate.compare( "TypeInputInterface" ) == 0 ) {
+      // Input type
+      _io._direction = "In";
+    } else {
+      _io._direction = "Out";
+    }
+  }
+  // StateMachine::CollectIODirection
+
+  void StateMachine::CollectIOType( const CXCursor cursor )
+  {
+    // Entry to this state is is only possible by passing through the state IONAME_COLLECTION
+    // wherein an IODetails instance is created. already created. number of io instances already
+    // recorded
+    size_t nInstances = this->_classDetails._io.size( );
+
+    // extract the latest instance.
+    IODetails &_io = this->_classDetails._io.at( nInstances - 1 );
+
+    const CXType type = clang_getCursorType( cursor );
+    _io._type = this->toString( clang_getTypeSpelling( type ) );
+  }
+  // StateMachine::CollectIOType
 
 }  // namespace RomanoViolet

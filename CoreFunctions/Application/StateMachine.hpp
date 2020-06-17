@@ -27,7 +27,9 @@ namespace RomanoViolet
       IONAMESPACE_COLLECTION,
       IODIRECTION_COLLECTION,
       IOTYPE_COLLECTION,
-      IDLE  ///< No explicit action to be performed. Waiting for expected event.
+      IDLE_AFTER_BASENAMECOLLECTION,  ///< No explicit action to be performed. Waiting for expected
+                                      ///< event.
+      IDLE_AFTER_IODIRECTIONCOLLECTION
     };
 
     // Explicitly agreed events in order to transition between states.
@@ -56,11 +58,15 @@ namespace RomanoViolet
     void CollectClassName( const CXCursor cursor );
     void CollectBaseClassName( const CXCursor cursor );
     void CollectIOName( const CXCursor cursor );
+    void CollectIONameSpace( const CXCursor cursor );
+    void CollectIODirection( const CXCursor cursor );
+    void CollectIOType( const CXCursor cursor );
 
     struct IODetails {
       std::string _ioName;
       std::string _type;
       std::string _direction;
+      std::string _namespace;
     };
 
     struct ClassDetails {
