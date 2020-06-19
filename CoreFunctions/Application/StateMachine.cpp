@@ -48,6 +48,11 @@ namespace RomanoViolet
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::TYPEREF, State::IOTYPE_COLLECTION } };
 
+    this->rules[State::IOTYPE_COLLECTION]
+        = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
+            { Event::FIELD_DECLARATION, State::IONAME_COLLECTION },
+            { Event::OTHERS, State::IDLE_AFTER_BASENAMECOLLECTION } };
+
     this->_currentState = State::INIT;
   }
 
@@ -71,6 +76,18 @@ namespace RomanoViolet
       }
     }
 
+    // Is OTHERS event listed?
+    if ( !isNewTargetStateComputed ) {
+      for ( const std::pair< Event, _newState_t > thisPossibility : possibilities ) {
+        if ( thisPossibility.first == Event::OTHERS ) {
+          // In case no event matches, the OTHERS rule is taken.
+          // TODO Rename Event::OTHERS
+          targetState = thisPossibility.second;
+          isNewTargetStateComputed = true;
+          break;
+        }
+      }
+    }
     // process events, such as (_currentState == NAMESPACE && !((event == CLASS_DECLARATION) ||
     // (event == NAMESPACE))
     if ( ( this->_currentState == State::NAMESPACE_COLLECTION )
@@ -210,9 +227,17 @@ namespace RomanoViolet
       }
 
       case CXCursorKind::CXCursor_FieldDecl: {
+        // The new state is always IONAME_COLLECTION
         newState = this->GetNewState( this->_currentState, Event::FIELD_DECLARATION );
+
+        size_t nIOPrior = this->_classDetails._io.size( );
         this->DoInStateAction( newState, cursor );
-        this->_currentState = newState;
+
+        // only if a new IO has been collected, advance the state
+        if ( this->_classDetails._io.size( ) > nIOPrior ) {
+          this->_currentState = newState;
+        }
+
         break;
       }
 
@@ -274,9 +299,12 @@ namespace RomanoViolet
 
   void StateMachine::CollectIOName( const CXCursor cursor )
   {
-    IODetails _io;
-    _io._ioName = this->toString( clang_getCursorSpelling( cursor ) );
-    this->_classDetails._io.emplace_back( _io );
+    // we collect only public facing IO
+    if ( clang_getCXXAccessSpecifier( cursor ) == CX_CXXAccessSpecifier::CX_CXXPublic ) {
+      IODetails _io;
+      _io._ioName = this->toString( clang_getCursorSpelling( cursor ) );
+      this->_classDetails._io.emplace_back( _io );
+    }
 
   }  // StateMachine::CollectBaseClassName
 

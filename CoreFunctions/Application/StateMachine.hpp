@@ -41,7 +41,8 @@ namespace RomanoViolet
       CXX_ACCESS_SPECIFIER,
       FIELD_DECLARATION,
       NAME_SPACE_REFERENCE,
-      TEMPLATE_REFERENCE
+      TEMPLATE_REFERENCE,
+      OTHERS
     };
 
     void AdvanceStateMachine( const CXCursor cursor );
