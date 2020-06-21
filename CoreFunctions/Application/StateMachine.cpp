@@ -36,7 +36,8 @@ namespace RomanoViolet
     this->rules[State::IONAMESPACE_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
             { Event::NAME_SPACE_REFERENCE, State::IONAMESPACE_COLLECTION },
-            { Event::TEMPLATE_REFERENCE, State::IODIRECTION_COLLECTION } };
+            { Event::TEMPLATE_REFERENCE, State::IODIRECTION_COLLECTION },
+            { Event::TYPEREF, State::IOTYPE_COLLECTION } };
 
     this->rules[State::IODIRECTION_COLLECTION]
         = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
