@@ -24,6 +24,7 @@ namespace NN
       ::RomanoViolet::TypeOutputInterface< ::RomanoViolet::InterfaceB > b_in;
       ::RomanoViolet::TypeOutputInterface< ::RomanoViolet::InterfaceB > b_out;
       ::RomanoViolet::InterfaceB b2;
+      int c;
 
       void initialize( );
       void doPreconditionCheck( );

@@ -167,10 +167,6 @@ namespace RomanoViolet
     }
   }
 
-  void StateMachine::ComputeTransition( const Event event )
-  {
-  }
-
   // reads the AST line by line in order to advance the state machine
   void StateMachine::AdvanceStateMachine( const CXCursor cursor )
   {
@@ -179,21 +175,23 @@ namespace RomanoViolet
     switch ( kind ) {
       case CXCursorKind ::CXCursor_Namespace: {
         newState = this->GetNewState( this->_currentState, Event::NAMESPACE );
-        this->DoInStateAction( newState, cursor );
         this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
+
         break;
       }
 
       case CXCursorKind::CXCursor_ClassDecl: {
         newState = this->GetNewState( this->_currentState, Event::CLASS_DECLARATION );
-        this->DoInStateAction( newState, cursor );
+        this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
 
-        // fi the class name does not match the one that we are after
+        // if the class name does not match the one that we are after
         if ( this->_classDetails._name.compare( this->_classToInspect ) != 0 ) {
+          // roll back the state
           newState = StateMachine::State::INIT;
-          this->DoInStateAction( newState, cursor );
-        } else {
           this->_currentState = newState;
+          this->DoInStateAction( this->_currentState, cursor );
         }
         break;
       }
@@ -203,13 +201,13 @@ namespace RomanoViolet
         // if class name matches the one that we should find
         if ( this->_classDetails._name.compare( this->_classToInspect ) == 0 ) {
           newState = this->GetNewState( this->_currentState, Event::BASECLASS_SPECIFIER );
+          this->_currentState = newState;
         } else {
           // if it is not the class that is being sought, go back to initial state.
           newState = StateMachine::State::INIT;
+          this->_currentState = newState;
         }
-
-        this->DoInStateAction( newState, cursor );
-        this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
         break;
       }
 
@@ -217,26 +215,32 @@ namespace RomanoViolet
         // if class name matches the one that we should find
         if ( this->_classDetails._name.compare( this->_classToInspect ) == 0 ) {
           newState = this->GetNewState( this->_currentState, Event::TYPEREF );
+          this->_currentState = newState;
         } else {
           // if it is not the class that is being sought, go back to initial state.
           newState = StateMachine::State::INIT;
+          this->_currentState = newState;
         }
 
-        this->DoInStateAction( newState, cursor );
-        this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
+
         break;
       }
 
       case CXCursorKind::CXCursor_FieldDecl: {
         // The new state is always IONAME_COLLECTION
-        newState = this->GetNewState( this->_currentState, Event::FIELD_DECLARATION );
-
+        StateMachine::State _oldState = this->_currentState;
         size_t nIOPrior = this->_classDetails._io.size( );
-        this->DoInStateAction( newState, cursor );
+
+        newState = this->GetNewState( this->_currentState, Event::FIELD_DECLARATION );
+        this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
 
         // only if a new IO has been collected, advance the state
-        if ( this->_classDetails._io.size( ) > nIOPrior ) {
-          this->_currentState = newState;
+        if ( this->_classDetails._io.size( ) == nIOPrior ) {
+          // a new IO public declaration was not found.
+          // Revert to old state.
+          this->_currentState = _oldState;
         }
 
         break;
@@ -244,15 +248,17 @@ namespace RomanoViolet
 
       case CXCursorKind::CXCursor_NamespaceRef: {
         newState = this->GetNewState( this->_currentState, Event::NAME_SPACE_REFERENCE );
-        this->DoInStateAction( newState, cursor );
         this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
+
         break;
       }
 
       case CXCursorKind::CXCursor_TemplateRef: {
         newState = this->GetNewState( this->_currentState, Event::TEMPLATE_REFERENCE );
-        this->DoInStateAction( newState, cursor );
         this->_currentState = newState;
+        this->DoInStateAction( this->_currentState, cursor );
+
         break;
       }
 
@@ -304,6 +310,8 @@ namespace RomanoViolet
     if ( clang_getCXXAccessSpecifier( cursor ) == CX_CXXAccessSpecifier::CX_CXXPublic ) {
       IODetails _io;
       _io._ioName = this->toString( clang_getCursorSpelling( cursor ) );
+      const CXType type = clang_getCursorType( cursor );
+      _io._type = this->toString( clang_getTypeSpelling( type ) );
       this->_classDetails._io.emplace_back( _io );
     }
 
