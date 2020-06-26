@@ -13,7 +13,39 @@ For this project, a [header file](./TestVectors/Component.hpp) is used as a typi
 | GCC   |   9.3.0 |
 | Clang |   11.0.0 |
 | C++ Standard   |   11, 14, 17 |
-| Docker         | 19.03.12 |
+| Docker*         | 19.03.12 |
+
+\* Docker is required if container-based development is preferred.
+
+## Build And Run The Project
+### Option 1: Via Shell Script
+Execute the provided shell script, making it executable if necessary first:
+```bash
+./buildProject.sh -s 11 -c LLVM -b debug
+```
+To get available build options, run the `buildProject.sh` without arguments:
+```bash
+./buildProject.sh
+```
+### Option 2: Docker Based Tools
+All compilers and tools used in the development of this project are available in a container. See provided [Dockerfile](./.devcontainer/Dockerfile) for details.
+#### Pre-Requisities
+1. [Visual Studio Code](https://code.visualstudio.com)
+2. Visual Studio Code plugin [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+3. Docker with access to internet.
+
+#### How To Use
+1. Ensure pre-requisites are met,
+2. Clone this repository,
+3. Open Visual Studio Code, Run the Remote-Containers: `Open Folder in Container...` command and select the folder where (the master branch of) this repository is cloned.
+   1. See [this link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) for more help.
+4. VSCode will attempt to build the container based on the provided [Dockerfile](./.devcontainer/Dockerfile) automatically.
+5. On success, `Ctrl+Shift+B` will bring a menu of possible build choices that may be selected from.
+
+#### Configurations for Machines Behind A Proxy
+1. You may require an *authenticating proxy* such as [cntlm](http://cntlm.sourceforge.net)
+2. You will need to configure Docker to work with your proxy
+3. You will need to configure ./devcontainer/devcontainer.json to work with proxy.
 
 ## Brief Note on Implementation
 The parser is implemented in the class [`RomanoViolet::StateMachine`](./CoreFunctions/Application/StateMachine.hpp) class.
