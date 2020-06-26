@@ -30,7 +30,7 @@ struct Data {
   IODetails _tempIODetails;
   bool insideClass = false;
   bool insideIODeclaration = false;
-  RomanoViolet::StateMachine *sm;
+  RomanoViolet::StateMachine *p;
 };
 
 std::string toString( CXString cxString )
@@ -92,7 +92,7 @@ CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientD
   // CXString name = clang_getCursorSpelling( cursor );
   ( void )parent;
   Data *data = static_cast< Data * >( clientData );
-  data->sm->AdvanceStateMachine( cursor );
+  data->p->AdvanceStateMachine( cursor );
 
   // clang visitor should visit the next sibling of this cursor without visiting the children.
   return CXChildVisit_Recurse;
@@ -156,7 +156,7 @@ auto main( int argc, const char *argv[] ) -> int
   clang_disposeIndex( index );
 
   // Second Pass
-  RomanoViolet::StateMachine sm{ data._classDetails._name };
+  RomanoViolet::StateMachine p{ data._classDetails._name };
   index = clang_createIndex( /*excludeDeclarationsFromPCH=*/true,
                              /*displayDiagnostics=*/true );
   flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
@@ -177,9 +177,9 @@ auto main( int argc, const char *argv[] ) -> int
   if ( tu == nullptr ) {
     std::cerr << "Unable to parse translation unit. Quitting.\n";
   } else {
-    data.sm = &sm;
+    data.p = &p;
     traverse( tu, data );
-    data.sm->print( );
+    data.p->print( );
     clang_disposeTranslationUnit( tu );
   }
   clang_disposeIndex( index );
