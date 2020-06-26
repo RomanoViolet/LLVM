@@ -47,6 +47,7 @@ namespace RomanoViolet
 
     void AdvanceStateMachine( const CXCursor cursor );
     void DoInStateAction( const State currentState, const CXCursor cursor );
+    void print( );
 
   private:
     State _currentState;

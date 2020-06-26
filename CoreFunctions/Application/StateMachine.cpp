@@ -1,5 +1,6 @@
 #include "StateMachine.hpp"
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 namespace RomanoViolet
 {
@@ -367,5 +368,11 @@ namespace RomanoViolet
     _io._type = this->toString( clang_getTypeSpelling( type ) );
   }
   // StateMachine::CollectIOType
+
+  void StateMachine::print( )
+  {
+    std::cout << std::left << std::setw( 30 ) << "Class Name: ";
+    std::cout << this->_classDetails._name << std::endl;
+  }
 
 }  // namespace RomanoViolet

@@ -291,6 +291,7 @@ auto main( int argc, const char *argv[] ) -> int
   } else {
     data.sm = &sm;
     traverse( tu, data );
+    data.sm->print( );
     clang_disposeTranslationUnit( tu );
   }
   clang_disposeIndex( index );
