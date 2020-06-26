@@ -63,6 +63,7 @@ namespace RomanoViolet
     void CollectIONameSpace( const CXCursor cursor );
     void CollectIODirection( const CXCursor cursor );
     void CollectIOType( const CXCursor cursor );
+    void SortIO( );
 
     struct IODetails {
       std::string _ioName;

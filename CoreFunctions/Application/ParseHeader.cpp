@@ -51,8 +51,6 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
 
-  std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
-
   // collect all successive namespaces
   if ( kind == CXCursorKind ::CXCursor_Namespace ) {
     if ( data->_temp.empty( ) ) {
@@ -72,8 +70,6 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
   switch ( kind ) {
     case CXCursorKind ::CXCursor_ClassDecl: {
       // AST hierarchy for top level class: Namespace - Class - Baseclass.
-      const CXType type = clang_getCursorType( cursor );
-      std::cout << toString( clang_getTypeSpelling( type ) ) << std::endl;
       data->_classDetails._namespace = data->_temp;
       data->_classDetails._name = toString( clang_getCursorSpelling( cursor ) );
       // data->_classDetails._namespace.append( "::" + toString( clang_getCursorSpelling( parent ) )
@@ -93,120 +89,9 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
 
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
 {
-  // Parse the header only for items of interest
-  CXCursorKind kind = clang_getCursorKind( cursor );
   // CXString name = clang_getCursorSpelling( cursor );
   Data *data = static_cast< Data * >( clientData );
-
-  if ( toString( clang_getCursorSpelling( cursor ) ).compare( "NN" ) == 0 ) {
-    std::cout << "Here it starts" << std::endl;
-  }
-
   data->sm->AdvanceStateMachine( cursor );
-
-  std::cout << toString( clang_getCursorKindSpelling( kind ) ) << std::endl;
-
-  // collect all successive namespaces
-  if ( kind == CXCursorKind ::CXCursor_Namespace ) {
-    if ( data->_temp.empty( ) ) {
-      data->_temp = toString( clang_getCursorSpelling( cursor ) );
-    } else {
-      data->_temp.append( "::" + toString( clang_getCursorSpelling( cursor ) ) );
-    }
-  }
-
-  // in order to bot collect all possible non-consecutive namespaces, clear the variable
-  // when the current cursor is not a namespace and neither is the parent.
-  if ( ( kind != CXCursorKind ::CXCursor_Namespace )
-       && ( clang_getCursorKind( parent ) != CXCursorKind ::CXCursor_Namespace ) ) {
-    data->_temp.clear( );
-  }
-
-  // // collect all successive namespace references
-  // if ( kind == CXCursorKind ::CXCursor_NamespaceRef ) {
-  //   if ( data->_temp.empty( ) ) {
-  //     data->_temp = toString( clang_getCursorSpelling( cursor ) );
-  //   } else {
-  //     data->_temp.append( "::" + toString( clang_getCursorSpelling( cursor ) ) );
-  //   }
-  // }
-
-  // // in order to bot collect all possible non-consecutive namespaces references, clear the
-  // variable
-  // // when the current cursor is not a namespace and neither is the parent.
-  // if ( ( kind != CXCursorKind ::CXCursor_NamespaceRef )
-  //      && ( clang_getCursorKind( parent ) != CXCursorKind ::CXCursor_NamespaceRef ) ) {
-  //   data->_temp.clear( );
-  // }
-  // Look for Base Class
-
-  switch ( kind ) {
-    case CXCursorKind ::CXCursor_ClassDecl: {
-      // Are we examining the correct class?
-      if ( ( data->_temp.compare( data->_classDetails._namespace ) == 0 )
-           && ( data->_classDetails._name.compare( toString( clang_getCursorSpelling( cursor ) ) )
-                == 0 ) ) {
-        // we are at the correct class
-        data->insideClass = true;
-      }
-      break;
-    }
-
-    case CXCursorKind::CXCursor_CXXBaseSpecifier: {
-      // only if we are in the class which we want to examine
-      if ( data->insideClass ) {
-        // base class. Parent is ClassDecl.
-        assert( clang_getCursorKind( parent ) == CXCursorKind::CXCursor_ClassDecl
-                && "Base Class Without Matching Derived Class." );
-        // data->_classDetails._baseclass = toString( clang_getCursorSpelling( cursor ) );
-        const CXType type = clang_getCursorType( cursor );
-        data->_classDetails._baseclass = toString( clang_getTypeSpelling( type ) );
-        break;
-      }
-    }
-
-    case CXCursorKind::CXCursor_FieldDecl: {
-      if ( data->insideClass ) {
-        std::cout << toString( clang_getCursorSpelling( cursor ) ) << std::endl;
-        data->_tempIODetails._ioName = toString( clang_getCursorSpelling( cursor ) );
-        data->insideIODeclaration = true;
-      }
-      // data->io.emplace_back(
-      //     IODetails{ _ioName : toString( clang_getCursorSpelling( cursor ) ) } );
-      break;
-    }
-
-    case CXCursorKind::CXCursor_TemplateRef: {
-      if ( data->insideIODeclaration ) {
-        std::string direction = toString( clang_getCursorSpelling( cursor ) );
-        if ( ( direction.compare( "TypeInputInterface" ) == 0 )
-             || ( direction.compare( "TypeOutputInterface" ) == 0 ) ) {
-          data->_tempIODetails._direction = direction;
-        } else {
-          // this is not the field declaration we are interested in.
-          data->_tempIODetails = IODetails{ };
-          data->insideIODeclaration = false;
-        }
-
-        break;
-      }
-
-      case CXCursorKind::CXCursor_TypeRef: {
-        if ( data->insideIODeclaration ) {
-          data->_tempIODetails._type = toString( clang_getCursorSpelling( cursor ) );
-          data->io.emplace_back( data->_tempIODetails );
-          data->_tempIODetails = IODetails{ };
-          data->insideIODeclaration = false;
-          break;
-        }
-      }
-
-      break;
-    }
-
-    default:
-      break;
-  }
 
   // clang visitor should visit the next sibling of this cursor without visiting the children.
   return CXChildVisit_Recurse;

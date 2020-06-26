@@ -369,10 +369,68 @@ namespace RomanoViolet
   }
   // StateMachine::CollectIOType
 
+  void StateMachine::SortIO( )
+  {
+    std::vector< IODetails > sortedIODetails;
+    for ( auto _io : this->_classDetails._io ) {
+      // all inputs
+      if ( _io._direction.compare( "In" ) == 0 ) {
+        sortedIODetails.emplace_back( _io );
+      }
+
+      // all outputs
+      if ( _io._direction.compare( "Out" ) == 0 ) {
+        sortedIODetails.emplace_back( _io );
+      }
+
+      // no clear input or outputs
+      if ( _io._direction.empty( ) ) {
+        sortedIODetails.emplace_back( _io );
+      }
+    }
+
+    this->_classDetails._io.clear( );
+
+    for ( auto &_io : sortedIODetails ) {
+      this->_classDetails._io.emplace_back( _io );
+    }
+  }
+
   void StateMachine::print( )
   {
-    std::cout << std::left << std::setw( 30 ) << "Class Name: ";
-    std::cout << this->_classDetails._name << std::endl;
+    std::cout << std::left << std::setw( 20 ) << "Class Name: ";
+    std::cout << this->_classDetails._namespace << "::" << this->_classDetails._name << std::endl;
+
+    std::cout << std::left << std::setw( 25 ) << "Base Class: ";
+    std::cout << this->_classDetails._baseclass << std::endl;
+
+    this->SortIO( );
+
+    for ( auto _io : this->_classDetails._io ) {
+      if ( _io._direction.compare( "In" ) == 0 ) {
+        std::cout << std::right << std::setw( 25 ) << "Input: ";
+        std::cout << std::left << std::setw( 15 ) << _io._ioName;
+        std::cout << std::left << std::setw( 7 ) << "Type: " << _io._type;
+        std::cout << std::endl;
+      }
+    }
+    for ( auto _io : this->_classDetails._io ) {
+      if ( _io._direction.compare( "Out" ) == 0 ) {
+        std::cout << std::right << std::setw( 25 ) << "Output: ";
+        std::cout << std::left << std::setw( 15 ) << _io._ioName;
+        std::cout << std::left << std::setw( 7 ) << "Type: " << _io._type;
+        std::cout << std::endl;
+      }
+    }
+
+    for ( auto _io : this->_classDetails._io ) {
+      if ( _io._direction.empty( ) ) {
+        std::cout << std::right << std::setw( 25 ) << "Ambiguous: ";
+        std::cout << std::left << std::setw( 15 ) << _io._ioName;
+        std::cout << std::left << std::setw( 7 ) << "Type: " << _io._type;
+        std::cout << std::endl;
+      }
+    }
   }
 
 }  // namespace RomanoViolet
