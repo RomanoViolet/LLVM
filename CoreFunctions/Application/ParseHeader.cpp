@@ -90,6 +90,7 @@ CXChildVisitResult visitForFirstPass( CXCursor cursor, CXCursor parent, CXClient
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
 {
   // CXString name = clang_getCursorSpelling( cursor );
+  ( void )parent;
   Data *data = static_cast< Data * >( clientData );
   data->sm->AdvanceStateMachine( cursor );
 
@@ -129,7 +130,7 @@ auto main( int argc, const char *argv[] ) -> int
   unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
                    | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
                    | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
-                   | CXTranslationUnit_SingleFileParse;
+                   | CXTranslationUnit_Flags::CXTranslationUnit_SingleFileParse;
 
   constexpr const char *defaultArguments[] = {
       "-x", "c++", "-std=c++11", "-Xclang", "-fsyntax-only", "-I/workspaces/LLVM/CoreFunctions" };
@@ -162,6 +163,8 @@ auto main( int argc, const char *argv[] ) -> int
           | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
           | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
           | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
+
+  std::cout << "------------------------------------------" << std::endl;
 
   tu = clang_parseTranslationUnit( index,
                                    /*source_filename=*/argv[1],

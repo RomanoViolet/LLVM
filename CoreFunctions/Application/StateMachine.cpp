@@ -70,7 +70,7 @@ namespace RomanoViolet
     StateMachine::State targetState;
 
     // Index into the vector based on the event
-    for ( const std::pair< Event, _newState_t > thisPossibility : possibilities ) {
+    for ( const std::pair< Event, _newState_t > &thisPossibility : possibilities ) {
       if ( thisPossibility.first == event ) {
         targetState = thisPossibility.second;
         isNewTargetStateComputed = true;
@@ -80,7 +80,7 @@ namespace RomanoViolet
 
     // Is OTHERS event listed?
     if ( !isNewTargetStateComputed ) {
-      for ( const std::pair< Event, _newState_t > thisPossibility : possibilities ) {
+      for ( const std::pair< Event, _newState_t > &thisPossibility : possibilities ) {
         if ( thisPossibility.first == Event::OTHERS ) {
           // In case no event matches, the OTHERS rule is taken.
           // TODO Rename Event::OTHERS
