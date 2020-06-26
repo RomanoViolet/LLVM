@@ -57,7 +57,7 @@ this->rules[State::INIT] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
                                  { Event::CLASS_DECLARATION, State::CLASSNAME_COLLECTION } };
 ```
 
-with [rules]((./CoreFunctions/Application/StateMachine.hpp) declare a data structure to encode state-transitions from _current state_ to a _new state_ based on an _Event_:
+with [rules](./CoreFunctions/Application/StateMachine.hpp) declare a data structure to encode state-transitions from _current state_ to a _new state_ based on an _Event_:
 ```c++
 std::map< _currentState_t, std::vector< std::pair< Event, _newState_t > > > rules;
 ```
