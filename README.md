@@ -95,6 +95,48 @@ std::map< _currentState_t, std::vector< std::pair< Event, _newState_t > > > rule
 ```
 The `std::vector< std::pair< Event, _newState_t > >` allows transition to multiple new states from a given current state based on different values taken on by the event.
 
+#### Transition Rules For State Machine
+The rules are written after observing the result produced by an LLVM parser, like the one written by [Peter Goldsborough](https://github.com/peter-can-talk/cppnow-2017). One of [Peter's example](./CoreFunctions/Application/AstDumpOrig.cpp) has been adapted for this project to generate the result of an LLVM parser which generates text like shown below (partial listing):
+
+```bash
+|-Namespace 127891415 <line:9:1, line:35:1> line:9:11 NN  
+| `-Namespace 3952112176 <line:11:3, line:34:3> line:11:13 RomanoViolet  
+|   `-ClassDecl 2340098849 <line:13:5, line:33:5> line:13:11 Component NN::RomanoViolet::Component
+|     |-C++ base class specifier 3782358474 <col:23, col:55> col:30 3819089211 class TypeHighAssuranceComponent TypeHighAssuranceComponent
+|     | `-TypeRef 3989614820 <col:30, col:55> col:30 3819089211 class TypeHighAssuranceComponent TypeHighAssuranceComponent
+|     |-CXXAccessSpecifier 3646394674 <line:15:5, col:11> col:5   
+|     |-EnumDecl 1437190249 <line:16:7, col:73> col:18 ErrorCode NN::RomanoViolet::Component::ErrorCode
+|     | |-EnumConstantDecl 3935002420 <col:38, col:50> col:38 NO_ERROR NN::RomanoViolet::Component::ErrorCode
+|     | | `-UnexposedExpr 3742966453 <col:49, col:50> col:49  short
+|     | |   `-IntegerLiteral 829964490 <col:49, col:50> col:49  unsigned int
+|     | `-EnumConstantDecl 153294274 <col:53, col:71> col:53 BAD_INPUT_DATA NN::RomanoViolet::Component::ErrorCode
+|     |   `-UnexposedExpr 3962916194 <col:70, col:71> col:70  short
+|     |     `-IntegerLiteral 4135885179 <col:70, col:71> col:70  unsigned int
+|     |-CXXConstructor 235937490 <line:18:7, col:18> col:7 Component void ()
+|     |-FieldDecl 36711781 <line:23:7, col:75> col:72 a_in ::RomanoViolet::TypeInputInterface< ::RomanoViolet::InterfaceA>
+|     | |-NamespaceRef 984821533 <col:9, col:20> col:9 4078261751 RomanoViolet  
+|     | |-TemplateRef 2165410661 <col:23, col:40> col:23 501271699 TypeInputInterface  
+|     | |-NamespaceRef 984821533 <col:45, col:56> col:45 4078261751 RomanoViolet  
+|     | `-TypeRef 4261379432 <col:59, col:68> col:59 3981686915 class RomanoViolet::InterfaceA RomanoViolet::InterfaceA
+|     |-FieldDecl 308592855 <line:24:7, col:77> col:73 b_out ::RomanoViolet::TypeOutputInterface< ::RomanoViolet::InterfaceB>
+|     | |-NamespaceRef 984821533 <col:9, col:20> col:9 4078261751 RomanoViolet  
+|     | |-TemplateRef 3773219427 <col:23, col:41> col:23 3266196948 TypeOutputInterface  
+|     | |-NamespaceRef 984821533 <col:46, col:57> col:46 4078261751 RomanoViolet  
+|     | `-TypeRef 2706993704 <col:60, col:69> col:60 2608659120 class RomanoViolet::InterfaceB RomanoViolet::InterfaceB
+|     |-CXXMethod 4116592367 <line:26:7, col:24> col:12 initialize void ()
+|     |-CXXMethod 2007754990 <line:27:7, col:33> col:12 doPreconditionCheck void ()
+|     |-CXXMethod 1988825022 <line:28:7, col:21> col:12 compute void ()
+|     |-CXXMethod 1066151573 <line:29:7, col:34> col:12 doPostConditionCheck void ()
+|     |-CXXAccessSpecifier 1532104156 <line:31:5, col:12> col:5   
+|     `-FieldDecl 3633548769 <line:32:7, col:22> col:17 _error NN::RomanoViolet::Component::ErrorCode
+|       `-TypeRef 1086425527 <col:7, col:15> col:7 1437190249 enum NN::RomanoViolet::Component::ErrorCode NN::RomanoViolet::Component::ErrorCode
+```
+
+The indention denotes the specialization of a token, (e.g., Namespace &#8594; Namespace &#8594; ClassDecl) wherein the fully qualified name of the class is `NN::RomanoViolet::Component` (third line of the AST above).
+In the case at hand above, correctly inferring the class name requires the knowledge of the context immediately before the `ClassDecl` token is seen (i.e., two `Namespace` tokens). This project uses a state-machine to assimilate the context related a token of interest, with the transition between states triggered by the AST token received (e.g., `Namespace`).
+
+
+
 ## Reference: https://github.com/peter-can-talk/cppnow-2017
 ## Reference: https://github.com/lanl/CoARCT/blob/clang-9.0
 ## Reference: https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
