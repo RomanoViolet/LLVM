@@ -89,7 +89,7 @@ data.p = &p;
 ```
 
 ### The `visit` Function
-LLVM parsing tools allow the user to implement a `visit` function which is called to parse the provided C++ sources.
+LLVM parsing tools allow the user to implement a `visit` function which is called by the LLVM-library methods to parse the provided C++ sources.
 All functions available in the LLVM library are available for use in the user-written `visit` function. 
 The user (client) written `visit` function is required to have the following signature:
 ```c++

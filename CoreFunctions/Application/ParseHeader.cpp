@@ -1,7 +1,19 @@
-#include <cassert>
-#include <clang-c/Index.h>
+/**
+ * @file ParseHeader.cpp
+ * @author RomanoViolet
+ * @brief This is a wrapper for instantiating and invoking the parser RomanoViolet::StateMachine
+ * class.
+ * @version 1.0
+ * @date 2020-06-28
+ *
+ * @copyright Copyright (c) 2020
+ * @see Based on Peter Goldsborough's AST parser example. See README.md for the link to Peter's
+ * repository.
+ */
 
 #include "StateMachine.hpp"
+#include <cassert>
+#include <clang-c/Index.h>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -139,6 +151,10 @@ auto main( int argc, const char *argv[] ) -> int
   Data data;
 
   // First Pass to get class-level information out.
+  // The objective of the first pass is to find out the class declared in the test file
+  // "Component.hpp" and pass it to the second parse stage.
+  // If the exact class name is known before-hand, the first stage may be removed.
+
   CXTranslationUnit tu = clang_parseTranslationUnit( index,
                                                      /*source_filename=*/argv[1],
                                                      /*command_line_args=*/defaultArguments,
@@ -155,7 +171,7 @@ auto main( int argc, const char *argv[] ) -> int
   }
   clang_disposeIndex( index );
 
-  // Second Pass
+  // Second Pass: Aggregate required details of the requested class.
   RomanoViolet::StateMachine p{ data._classDetails._name };
   index = clang_createIndex( /*excludeDeclarationsFromPCH=*/true,
                              /*displayDiagnostics=*/true );
@@ -163,8 +179,6 @@ auto main( int argc, const char *argv[] ) -> int
           | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
           | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
           | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
-
-  std::cout << "------------------------------------------" << std::endl;
 
   tu = clang_parseTranslationUnit( index,
                                    /*source_filename=*/argv[1],

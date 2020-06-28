@@ -126,10 +126,13 @@ auto main( int argc, const char *argv[] ) -> int
   // See https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html
   // for the possible options (last argument).
 
-  unsigned flags = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
-                   | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
-                   | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
-                   | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord;
+  unsigned flags
+      = CXTranslationUnit_Flags::CXTranslationUnit_SkipFunctionBodies
+        | CXTranslationUnit_Flags::CXTranslationUnit_IgnoreNonErrorsFromIncludedFiles
+        | CXTranslationUnit_Flags::CXTranslationUnit_Incomplete
+        | CXTranslationUnit_Flags::CXTranslationUnit_DetailedPreprocessingRecord
+        | CXTranslationUnit_Flags::CXTranslationUnit_IncludeBriefCommentsInCodeCompletion;
+
   //| CXTranslationUnit_SingleFileParse;
   ;
 
