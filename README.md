@@ -4,7 +4,20 @@
 The project demonstrates the use [LibClang](https://clang.llvm.org/docs/Tooling.html) interface of the LLVM infrastructure for parsing C++ sources.
 For this project, a [header file](./TestVectors/Component.hpp) is used as a typical example of a C++ source to be parsed.
 
+## What To Expect From This Project 
+A method to parse a C++ source with known layout, using LLVM tools. 
+After parsing the header file, the output generated is like so:
 
+```bash 
+Class Name:         NN::RomanoViolet::Component
+Base Class:              TypeHighAssuranceComponent
+                  Input: a_in           Type:  RomanoViolet::InterfaceA
+                 Output: b_in           Type:  RomanoViolet::InterfaceB
+                 Output: b_out          Type:  RomanoViolet::InterfaceB
+              Ambiguous: b2             Type:  RomanoViolet::InterfaceB
+              Ambiguous: c              Type:  int
+```
+The `print` method used for generating the text is part of the class `RomanoViolet::StateMachine` user-written C++ parser class.
 ## Tools, Etc.
 | Tool |   Version Used |
 | ---:          |     :---      |
@@ -19,6 +32,7 @@ For this project, a [header file](./TestVectors/Component.hpp) is used as a typi
 
 ## Build And Run The Project
 ### Option 1: Via Shell Script
+Ensure that relevant compiler(s) along with LLVM development libraries are available on your system.
 Execute the provided shell script, making it executable if necessary first:
 ```bash
 ./buildProject.sh -s 11 -c LLVM -b debug
@@ -28,7 +42,7 @@ To get available build options, run the `buildProject.sh` without arguments:
 ./buildProject.sh
 ```
 ### Option 2: Docker Based Tools
-All compilers and tools used in the development of this project are available in a container. See provided [Dockerfile](./.devcontainer/Dockerfile) for details.
+All compilers, libraries, and tools used in the development of this project are available in a container. See provided [Dockerfile](./.devcontainer/Dockerfile) for details.
 #### Pre-Requisities
 1. [Visual Studio Code](https://code.visualstudio.com)
 2. Visual Studio Code plugin [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
@@ -134,10 +148,13 @@ The rules are written after observing the result produced by an LLVM parser, lik
 
 The indention denotes the specialization of a token, (e.g., Namespace &#8594; Namespace &#8594; ClassDecl) wherein the fully qualified name of the class is `NN::RomanoViolet::Component` (third line of the AST above).
 In the case at hand above, correctly inferring the class name requires the knowledge of the context immediately before the `ClassDecl` token is seen (i.e., two `Namespace` tokens). This project uses a state-machine to assimilate the context related a token of interest, with the transition between states triggered by the AST token received (e.g., `Namespace`).
+The final set of state transition rules required to parse the sample [header file](./TestVectors/Component.hpp) are encoded in the constructor of the [`RomanoViolet::StateMachine`](./CoreFunctions/Application/StateMachine.cpp), like so:
+
+```c++
+this->rules[State::INIT] = { { Event::NAMESPACE, State::NAMESPACE_COLLECTION },
+                                 { Event::CLASS_DECLARATION, State::CLASSNAME_COLLECTION } };
+```
 
 
-
-## Reference: https://github.com/peter-can-talk/cppnow-2017
-## Reference: https://github.com/lanl/CoARCT/blob/clang-9.0
-## Reference: https://devblogs.microsoft.com/cppblog/exploring-clang-tooling-part-2-examining-the-clang-ast-with-clang-query/
-## Reference: https://gist.github.com/raphaelmor/3150866
+## Reference: 
+https://github.com/peter-can-talk/cppnow-2017
