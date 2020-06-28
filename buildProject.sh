@@ -113,3 +113,11 @@ echo ""
 
 # Call the build
 ./BuildScripts/Docker/GeneralBuild ${BUILDTYPE} ${CC} ${STANDARD}
+
+echo
+echo 
+echo " -------------- Running The Parser --------------"
+# Run the parser
+./build/CPPProject ./TestVectors/Component.hpp -I./CoreFunctions
+echo 
+echo 

@@ -8,6 +8,17 @@ For this project, a [header file](./TestVectors/Component.hpp) is used as a typi
 A method to parse a C++ source with known layout, using LLVM tools. 
 After parsing the header file, the output generated is like so:
 
+The [header file](./TestVectors/Component.hpp) uses templates specifically written for declaring the direction of information carried by a public member e.g., `::RomanoViolet::TypeInputInterface` is used to declare a symbol carrying input information.
+The objective of the parsing the [header file](./TestVectors/Component.hpp) is to:
+* Summarize the base-class that the class (i.e., `Component`) inherits from;
+* Summarize data members used for providing input (to the instance of this class)
+* Summarize data members used for communicating the output (to the instance of this class)
+* Any data members which have ambiguous direction
+
+An alternate approach is to simply declare all input data carrying members as `const` reference types.
+The template approach allows the library (e.g., `::RomanoViolet::TypeInputInterface`) to provide its customers convenience methods expected for any input, e.g., compute running average of input values.
+
+After processing the [header file](./TestVectors/Component.hpp), the following result is generated:
 ```bash 
 Class Name:         NN::RomanoViolet::Component
 Base Class:              TypeHighAssuranceComponent
@@ -18,6 +29,8 @@ Base Class:              TypeHighAssuranceComponent
               Ambiguous: c              Type:  int
 ```
 The `print` method used for generating the text is part of the class `RomanoViolet::StateMachine` user-written C++ parser class.
+
+
 ## Tools, Etc.
 | Tool |   Version Used |
 | ---:          |     :---      |
