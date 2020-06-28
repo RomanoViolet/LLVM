@@ -12,7 +12,7 @@ The [header file](./TestVectors/Component.hpp) uses templates specifically writt
 The objective of the parsing the [header file](./TestVectors/Component.hpp) is to:
 * Summarize the base-class that the class (i.e., `Component`) inherits from;
 * Summarize data members used for providing input (to the instance of this class)
-* Summarize data members used for communicating the output (to the instance of this class)
+* Summarize data members used for communicating the output (from the instance of this class)
 * Any data members which have ambiguous direction
 
 An alternate approach is to simply declare all input data carrying members as `const` reference types.
@@ -75,7 +75,7 @@ All compilers, libraries, and tools used in the development of this project are 
 3. You will need to configure ./devcontainer/devcontainer.json to work with proxy.
 
 ## Brief Note on Implementation
-The parser is implemented in the class [`RomanoViolet::StateMachine`](./CoreFunctions/Application/StateMachine.hpp) class.
+The parser is implemented in the [`RomanoViolet::StateMachine`](./CoreFunctions/Application/StateMachine.hpp) class.
 The parser is instantiated from the client(or user) code implemented in [ParseHeader.cpp](./CoreFunctions/Application/ParseHeader.cpp) in line 159:
 
 ```c++
@@ -87,11 +87,11 @@ Once instantiated, the parser instance 	`p` is added to the data structure `data
 ```c++
 data.p = &p;
 ```
-### `data` and `p`
-A pointer to the data structure `data` forms the _opaque pointer_ which may be passed to the (client written) `visit` function in order to store results persistently across multiple calls to the `visit` function.
 
 ### The `visit` Function
-The LLVM parser expects a user (client) written `visit` function to have the following signature:
+LLVM parsing tools allow the user to implement a `visit` function which is called to parse the provided C++ sources.
+All functions available in the LLVM library are available for use in the user-written `visit` function. 
+The user (client) written `visit` function is required to have the following signature:
 ```c++
 CXChildVisitResult functionName( CXCursor cursor, CXCursor parent, CXClientData clientData )
 ```
@@ -106,6 +106,11 @@ Line 90, [ParseHeader.cpp](./CoreFunctions/Application/ParseHeader.cpp):
 ```c++
 CXChildVisitResult visit( CXCursor cursor, CXCursor parent, CXClientData clientData )
 ```
+
+### `data` and `p`
+A pointer to the data structure `data` forms the _opaque pointer_ which may be passed to the (client written) `visit` function in order to store results persistently across multiple calls to the `visit` function.
+
+
 
 ### Brief Approach
 #### The State Machine
